@@ -105,11 +105,13 @@ public class XeoTeleOP extends OpMode {
         servoRidS.setPosition(1 - servoPoz);
         relicPrindere=hardwareMap.servo.get("servo relic prindere");
         relicRidicare=hardwareMap.servo.get("servo relic ridicare");
+        relicPrindere.setPosition(0);
+        relicRidicare.setPosition(0);
       //  navxMicro = hardwareMap.get(NavxMicroNavigationSensor.class, "navx");
        // gyro = (IntegratingGyroscope)navxMicro;
         profil=1;
         servoBile = hardwareMap.servo.get("servo bile");
-        servoBile.setPosition(1);
+        //servoBile.setPosition(1);
 
         telemetry.log().add("Gyro Calibrating. Do Not Move!");
 
@@ -204,15 +206,18 @@ public class XeoTeleOP extends OpMode {
 
         /* ----------------------------- </miscare> ----------------------------- */
 
+            telemetry.addLine();
+            telemetry.addData("Servo Bile:", servoBile);
+
         /** ---------------------------- <profiluri> ----------------------------  */
         if (gamepad2.y)
         {
             profil=1;
         }
-       // if (gamepad2.a)
-        //{
-       //     profil=2;
-       // }
+        if (gamepad2.a)
+        {
+            profil=2;
+        }
         /* ---------------------------- </profiluri> ----------------------------  */
         /** ----------------------------- <prindere> ----------------------------- */
         servoRidD.setPosition(servoPoz - 0.06);
@@ -306,10 +311,32 @@ public class XeoTeleOP extends OpMode {
     @Override
     public void stop() {        //functie stop, se apeleaza la apasarea butonului stop
 
-
+        oprireServo();
+        oprireMotoare();
 
     }
 
+
+    public void oprireServo() {
+
+        servoBile.close();
+        servoRidD.close();
+        servoRidS.close();
+        relicPrindere.close();
+        relicRidicare.close();
+
+    }
+
+    public void oprireMotoare() {
+
+        motorBackRight.close();
+        motorBackLeft.close();
+        motorFrontRight.close();
+        motorFrontLeft.close();
+        motorRidicare.close();
+        motorRelic.close();
+
+    }
 
     //joystick input scale
     /*

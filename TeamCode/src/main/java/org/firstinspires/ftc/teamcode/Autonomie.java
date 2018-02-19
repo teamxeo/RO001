@@ -58,7 +58,7 @@ public class Autonomie extends LinearOpMode {
     private final double YAW_PID_D = 0.0;
     double stanga = 0.1;
     double dreapta = -0.1;
-    double pozitieServoBileJos = 0; // de vazut
+    double pozitieServoBileJos = 0.06; // de vazut
     double pozitieServoBileSus = 1;
     int rotireDreapta = 1;
     int rotireStanga = -1;
@@ -80,8 +80,8 @@ public class Autonomie extends LinearOpMode {
     private boolean calibration_complete = false;
     double ServS = 0.5;
     double ServD = 0.5;
-    double ServSLas = 0.32;
-    double ServDLas = 0.61;
+    double ServSLas = 1;
+    double ServDLas = 0;
 
     public static final String TAG = "Vuforia VuMark Sample";
 
@@ -148,7 +148,7 @@ public class Autonomie extends LinearOpMode {
             telemetry.update();
         }
 
-        puneServo(pozitieServoBileJos);
+
 
 
         rollInitial = navx_device.getPitch();
@@ -162,7 +162,7 @@ public class Autonomie extends LinearOpMode {
 
         RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
 
-        prindeCub(ServS,ServD);
+
 
         while (!opModeIsActive() && !Thread.currentThread().isInterrupted()){
             vuMark = RelicRecoveryVuMark.from(relicTemplate);
@@ -206,7 +206,9 @@ public class Autonomie extends LinearOpMode {
         while (opModeIsActive()) {
 
             zeroRoll = navx_device.getPitch();
-
+            prindeCub(ServS,ServD);
+            puneServo(pozitieServoBileJos);
+            TimeUnit.MILLISECONDS.sleep(1000);
             telemetry.addData("Rotatie: ", navx_device.getYaw());
             telemetry.update();
 
@@ -233,28 +235,30 @@ public class Autonomie extends LinearOpMode {
 
             rotire(0,treshHold,vitezaIntoarcere);
             du_teLaRaft(raft,vitezaMiscare);
-            mergiFata(vitezaMiscare);
+           // mergiFata(vitezaMiscare);
             TimeUnit.MILLISECONDS.sleep(300);
             mergiDreapta(vitezaMiscare);
             TimeUnit.MILLISECONDS.sleep(500);
-            rotire(-85,treshHold,vitezaIntoarcere);
+            rotire(-80,treshHold,vitezaIntoarcere);
             oprire();
-            mergiFata(vitezaMiscare);
-            TimeUnit.MILLISECONDS.sleep(1000);
+            mergiFata(vitezaMiscare, 0);
+            TimeUnit.MILLISECONDS.sleep(2000);
             oprire();
             lasaCub(ServSLas,ServDLas);
-            mergiFata(-vitezaMiscare);
+            mergiFata(-vitezaMiscare, 0.05);
+            TimeUnit.MILLISECONDS.sleep(1000);
             oprire();
+
+            oprireTot();
 
 
             //telemetry.addData("Blue ", colorSensor.blue());
             //telemetry.addData("Red ", colorSensor.red());
             //telemetry.addLine();
             //telemetry.addLine(Double.toString(servo.getPosition()));
-            telemetry.update();
-            break; //oprire cod sper
+            break;
         }
-
+        oprireTot();
     }
 
     public void calibrareRampa(double tinta , double treshHold ,double viteza) {
@@ -398,10 +402,10 @@ public class Autonomie extends LinearOpMode {
     }
 
 
-    public void mergiFata(double viteza){
-        motorFrontLeft.setPower(-viteza);
+    public void mergiFata(double viteza, double plus){
+        motorFrontLeft.setPower(-viteza - plus);
         motorFrontRight.setPower(viteza);
-        motorBackRight.setPower(viteza);
+        motorBackRight.setPower(viteza + plus);
         motorBackLeft.setPower(-viteza);
     }
 
@@ -416,7 +420,7 @@ public class Autonomie extends LinearOpMode {
 
          double dist1 = rangeSensor.getDistance(DistanceUnit.CM);
          double dist2 = dist1;
-         mergiFata(viteza);
+         mergiFata(viteza, 0);
          do{
 
              telemetry.addLine();
@@ -442,6 +446,15 @@ public class Autonomie extends LinearOpMode {
 
     }
 
+    public void oprireTot() {
+
+        navx_device.close();
+        rangeSensor.close();
+        colorSensor.close();
+        oprire();
+
+    }
+
     public void prindeCub(double stanga, double dreapta) throws InterruptedException {
 
         CubS.setPosition(stanga);
@@ -457,9 +470,9 @@ public class Autonomie extends LinearOpMode {
 
         CubS.setPosition(stanga);
         CubD.setPosition(dreapta);
-        mRid.setPower(-1);
-        TimeUnit.MILLISECONDS.sleep(500);
-        mRid.setPower(0);
+        //mRid.setPower(-1);
+       // TimeUnit.MILLISECONDS.sleep(500);
+       // mRid.setPower(0);
 
     }
 
@@ -468,7 +481,7 @@ public class Autonomie extends LinearOpMode {
     }
     public void da_teJosDePeRampa(double viteza, double rollInitial, double altInitial){
 
-       mergiFata(viteza);
+       mergiFata(viteza, 0);
 
         double treshHold = .2;
         while (Math.abs(navx_device.getPitch()) <= 10 && opModeIsActive()) {idle();}
