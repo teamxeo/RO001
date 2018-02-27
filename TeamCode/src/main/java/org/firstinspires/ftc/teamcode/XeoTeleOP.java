@@ -16,23 +16,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 
-/*
-    Cod miscare:
-    http://www.vexforum.com/index.php/12370-holonomic-drives-2-0-a-video-tutorial-by-cody/0
-
-   Robot wheel mapping:
-
-          X FRONT X
-        X           X
-      X  FL       FR  X
-              X
-             XXX
-              X
-      X  BL       BR  X
-        X           X
-          X       X
-*/
-
 
 @TeleOp(name = "Xeo17-18: Tele-OP", group = "Xeo17-18")
 //@Disabled
@@ -45,8 +28,10 @@ public class XeoTeleOP extends OpMode {
     DcMotor motorBackLeft;
     DcMotor motorRidicare;
     DcMotor motorRelic;
-    Servo   servoRidS;
-    Servo   servoRidD;
+    Servo   servoRidS_0;
+    Servo   servoRidS_1;
+    Servo   servoRidD_0;
+    Servo   servoRidD_1;
     Servo   relicPrindere;
     Servo   relicRidicare;
     //IntegratingGyroscope gyro;
@@ -54,6 +39,8 @@ public class XeoTeleOP extends OpMode {
     Servo   servoBile;
 
     private double servoPoz = 0.68;
+    private double servoPozS = 0.32;
+    private double servoPozD = 0.62;
     private double motorPower = 1.0;
     private double relicMotorPower = 1;
     double timp;
@@ -65,6 +52,8 @@ public class XeoTeleOP extends OpMode {
     double alpha = 0, beta = 0;
     double xDir = 0, yDir = 0;
     boolean apasat = false;
+    double pozDeschidere = 0.6792;
+    double pozInchidere = 0.5926;
 
     // A timer helps provide feedback while calibration is taking place
     ElapsedTime timer = new ElapsedTime();
@@ -98,20 +87,24 @@ public class XeoTeleOP extends OpMode {
         //motorBackLeft.setDirection(DcMotor.Direction.REVERSE);
         //motorFrontRight.setDirection(DcMotor.Direction.REVERSE);
         //motorBackRight.setDirection(DcMotor.Direction.REVERSE);
-        servoRidS = hardwareMap.servo.get("servo rid s");
-        servoRidD = hardwareMap.servo.get("servo rid d");
+        servoRidS_0 = hardwareMap.servo.get("servo rid s 0");
+        servoRidD_0 = hardwareMap.servo.get("servo rid d 0");
+        servoRidS_1 = hardwareMap.servo.get("servo rid s 1");
+        servoRidD_1 = hardwareMap.servo.get("servo rid d 1");
         motorRidicare = hardwareMap.dcMotor.get("motor rid");
-        servoRidD.setPosition(servoPoz - 0.06);
-        servoRidS.setPosition(1 - servoPoz);
-        relicPrindere=hardwareMap.servo.get("servo relic prindere");
-        relicRidicare=hardwareMap.servo.get("servo relic ridicare");
-        relicPrindere.setPosition(0);
-        relicRidicare.setPosition(0);
+        servoRidD_0.setPosition(servoPozD);
+        servoRidS_0.setPosition(servoPozS);
+        servoRidD_1.setPosition(servoPozD);
+        servoRidS_1.setPosition(servoPozS);
+       // relicPrindere=hardwareMap.servo.get("servo relic prindere");
+       // relicRidicare=hardwareMap.servo.get("servo relic ridicare");
+       // relicPrindere.setPosition(0);
+       // relicRidicare.setPosition(0);
       //  navxMicro = hardwareMap.get(NavxMicroNavigationSensor.class, "navx");
        // gyro = (IntegratingGyroscope)navxMicro;
         profil=1;
         servoBile = hardwareMap.servo.get("servo bile");
-        //servoBile.setPosition(1);
+        servoBile.setPosition(1);
 
         telemetry.log().add("Gyro Calibrating. Do Not Move!");
 
@@ -131,6 +124,7 @@ public class XeoTeleOP extends OpMode {
     @Override
     public void loop() {        //functie loop, se repeta continuu, de la apasarea start pana la apasarea stop
 
+        servoBile.setPosition(1);
         /** ----------------------------- <miscare> ----------------------------- */
         /* left stick controls direction
            right stick X controls rotation */
@@ -191,6 +185,8 @@ public class XeoTeleOP extends OpMode {
             motorBackLeft.setPower(BackLeft * motorPower);
             motorBackRight.setPower(BackRight * motorPower);
 
+
+
             //mecanumDrive_Cartesian(gamepad1.left_stick_x,gamepad1.left_stick_y,gamepad1.right_stick_x,angles.firstAngle, motorPower);
 
             //cutie viteze miscare
@@ -206,31 +202,44 @@ public class XeoTeleOP extends OpMode {
 
         /* ----------------------------- </miscare> ----------------------------- */
 
-            telemetry.addLine();
-            telemetry.addData("Servo Bile:", servoBile);
+            //telemetry.addLine();
+            //telemetry.addData("Servo Bile:", servoBile);
 
         /** ---------------------------- <profiluri> ----------------------------  */
         if (gamepad2.y)
         {
             profil=1;
         }
-        if (gamepad2.a)
-        {
-            profil=2;
-        }
+      //  if (gamepad2.a)
+       // {
+      //      profil=2;
+      //  }
         /* ---------------------------- </profiluri> ----------------------------  */
         /** ----------------------------- <prindere> ----------------------------- */
-        servoRidD.setPosition(servoPoz - 0.06);
-        servoRidS.setPosition(1 - servoPoz);
+
+                servoRidD_0.setPosition(servoPozD);
+                servoRidS_0.setPosition(servoPozS);
+                servoRidD_1.setPosition(servoPozD);
+                servoRidS_1.setPosition(servoPozS);
 
 
+        if(gamepad2.a) { // inchidere
+            servoPozS = 0.2988;
+            servoPozD = 0.6411;
+        }
+        if(gamepad2.b) { // deschidere
+            servoPozS = 0.4614;
+            servoPozD = 0.4785;
+        }
         if (profil==1)
         {
-            if (gamepad2.left_trigger != 0 && servoPoz > 0.05 && servoRidS.getPosition() <= 0.8) {
-                servoPoz -= gamepad2.left_trigger / 75;
+            if (gamepad2.left_trigger != 0 && servoPozD > 0.4 && servoPozS < 0.5) {
+                servoPozS += gamepad2.left_trigger / 25;
+                servoPozD -= gamepad2.left_trigger / 25;
             }
-            if(gamepad2.right_trigger != 0  && servoPoz < 0.95){
-                servoPoz += gamepad2.right_trigger / 75;
+            if(gamepad2.right_trigger != 0  && servoPozS > 0.25 && servoPozD < 0.7 ){
+                servoPozS -= gamepad2.right_trigger / 25;
+                servoPozD += gamepad2.right_trigger / 25;
             }
 
         }
@@ -255,8 +264,8 @@ public class XeoTeleOP extends OpMode {
         }
 
         telemetry.addData("Pozitie cod: ", servoPoz);
-        telemetry.addData("Real Dreapta: ", servoRidD.getPosition());
-        telemetry.addData("Real Stanga: ", servoRidS.getPosition());
+        telemetry.addData(" Dreapta: ",servoPozD);
+        telemetry.addData(" Stanga: ", servoPozS);
          /* ----------------------------- </ridicare> ----------------------------- */
 
         /** ----------------------------- <relic> ----------------------------- */
@@ -320,10 +329,12 @@ public class XeoTeleOP extends OpMode {
     public void oprireServo() {
 
         servoBile.close();
-        servoRidD.close();
-        servoRidS.close();
-        relicPrindere.close();
-        relicRidicare.close();
+        servoRidD_0.close();
+        servoRidS_0.close();
+        servoRidD_1.close();
+        servoRidS_1.close();
+      //  relicPrindere.close();
+      //  relicRidicare.close();
 
     }
 
@@ -334,7 +345,7 @@ public class XeoTeleOP extends OpMode {
         motorFrontRight.close();
         motorFrontLeft.close();
         motorRidicare.close();
-        motorRelic.close();
+       // motorRelic.close();
 
     }
 
