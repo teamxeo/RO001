@@ -85,9 +85,9 @@ public class Autonomie extends LinearOpMode {
     double ServSLas = 0.47;
     double ServDLas = 0.14;
     boolean terminat ;
-    double distRaft1 = 137;
-    double distRaft2 = distRaft1 + 19;
-    double distRaft3 = distRaft2 + 19;
+    double distRaft1 = 107;
+    double distRaft2 = 129;
+    double distRaft3 = 148;
     public static final String TAG = "Vuforia VuMark Sample";
 
     OpenGLMatrix lastLocation = null;

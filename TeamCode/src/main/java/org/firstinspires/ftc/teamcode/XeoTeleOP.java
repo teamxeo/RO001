@@ -3,6 +3,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -13,6 +14,7 @@ import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 
@@ -54,7 +56,7 @@ public class XeoTeleOP extends OpMode {
     boolean apasat = false;
     double pozDeschidere = 0.6792;
     double pozInchidere = 0.5926;
-
+    public ModernRoboticsI2cRangeSensor rangeSensor;
     // A timer helps provide feedback while calibration is taking place
     ElapsedTime timer = new ElapsedTime();
 
@@ -105,7 +107,7 @@ public class XeoTeleOP extends OpMode {
         profil=1;
         servoBile = hardwareMap.servo.get("servo bile");
         servoBile.setPosition(1);
-
+        rangeSensor = (ModernRoboticsI2cRangeSensor) hardwareMap.opticalDistanceSensor.get("sensor_distance");
         telemetry.log().add("Gyro Calibrating. Do Not Move!");
 
         //Wait until the gyro calibration is complete
@@ -125,6 +127,8 @@ public class XeoTeleOP extends OpMode {
     public void loop() {        //functie loop, se repeta continuu, de la apasarea start pana la apasarea stop
 
         servoBile.setPosition(1);
+        telemetry.addData("distanta", rangeSensor.getDistance(DistanceUnit.CM));
+        telemetry.update();
         /** ----------------------------- <miscare> ----------------------------- */
         /* left stick controls direction
            right stick X controls rotation */
@@ -180,10 +184,13 @@ public class XeoTeleOP extends OpMode {
             BackRight = Range.clip(BackRight, -1, 1);
 
             // write the values to the motors
-            motorFrontRight.setPower(FrontRight * motorPower);
-            motorFrontLeft.setPower(FrontLeft * motorPower);
-            motorBackLeft.setPower(BackLeft * motorPower);
-            motorBackRight.setPower(BackRight * motorPower);
+            if (!gamepad1.dpad_up && !gamepad1.dpad_down && !gamepad1.dpad_right && !gamepad1.dpad_left)
+            {
+                motorFrontRight.setPower(FrontRight * motorPower);
+                motorFrontLeft.setPower(FrontLeft * motorPower);
+                motorBackLeft.setPower(BackLeft * motorPower);
+                motorBackRight.setPower(BackRight * motorPower);
+            }
 
 
 
@@ -198,6 +205,36 @@ public class XeoTeleOP extends OpMode {
             }
             if (gamepad1.x) {
                 motorPower = 0.3;
+            }
+
+        //cod fata spate dreapta stanga
+            if (gamepad1.dpad_up)
+            {
+                motorFrontRight.setPower(motorPower);
+                motorFrontLeft.setPower(-motorPower);
+                motorBackLeft.setPower(-motorPower);
+                motorBackRight.setPower(motorPower);
+            }
+            if (gamepad1.dpad_down)
+            {
+                motorFrontRight.setPower(-motorPower);
+                motorFrontLeft.setPower(motorPower);
+                motorBackLeft.setPower(motorPower);
+                motorBackRight.setPower(-motorPower);
+            }
+            if (gamepad1.dpad_right)
+            {
+                motorFrontRight.setPower(motorPower);
+                motorFrontLeft.setPower(motorPower);
+                motorBackLeft.setPower(-motorPower);
+                motorBackRight.setPower(-motorPower);
+            }
+            if (gamepad1.dpad_left)
+            {
+                motorFrontRight.setPower(-motorPower);
+                motorFrontLeft.setPower(-motorPower);
+                motorBackLeft.setPower(motorPower);
+                motorBackRight.setPower(motorPower);
             }
 
         /* ----------------------------- </miscare> ----------------------------- */
@@ -230,6 +267,11 @@ public class XeoTeleOP extends OpMode {
         if(gamepad2.b) { // deschidere
             servoPozS = 0.4614;
             servoPozD = 0.4785;
+        }
+        if(gamepad2.x) // deschis si mai tare
+        {
+            servoPozS= 0.75;
+            servoPozD= 0.25;
         }
         if (profil==1)
         {
