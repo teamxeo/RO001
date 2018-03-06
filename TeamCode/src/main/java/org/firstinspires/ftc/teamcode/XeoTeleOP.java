@@ -43,7 +43,7 @@ public class XeoTeleOP extends OpMode {
     private double servoPoz = 0.68;
     private double servoPozS = 0.32;
     private double servoPozD = 0.62;
-    private double motorPower = 1.0;
+    private double motorPower = 0.3;
     private double relicMotorPower = 1;
     double timp;
     private int profil;
@@ -56,7 +56,7 @@ public class XeoTeleOP extends OpMode {
     boolean apasat = false;
     double pozDeschidere = 0.6792;
     double pozInchidere = 0.5926;
-    public ModernRoboticsI2cRangeSensor rangeSensor;
+   // public ModernRoboticsI2cRangeSensor rangeSensor;
     // A timer helps provide feedback while calibration is taking place
     ElapsedTime timer = new ElapsedTime();
 
@@ -107,7 +107,7 @@ public class XeoTeleOP extends OpMode {
         profil=1;
         servoBile = hardwareMap.servo.get("servo bile");
         servoBile.setPosition(1);
-        rangeSensor = (ModernRoboticsI2cRangeSensor) hardwareMap.opticalDistanceSensor.get("sensor_distance");
+      //  rangeSensor = (ModernRoboticsI2cRangeSensor) hardwareMap.opticalDistanceSensor.get("sensor_distance");
         telemetry.log().add("Gyro Calibrating. Do Not Move!");
 
         //Wait until the gyro calibration is complete
@@ -127,8 +127,8 @@ public class XeoTeleOP extends OpMode {
     public void loop() {        //functie loop, se repeta continuu, de la apasarea start pana la apasarea stop
 
         servoBile.setPosition(1);
-        telemetry.addData("distanta", rangeSensor.getDistance(DistanceUnit.CM));
-        telemetry.update();
+        //telemetry.addData("distanta", rangeSensor.getDistance(DistanceUnit.CM));
+       // telemetry.update();
         /** ----------------------------- <miscare> ----------------------------- */
         /* left stick controls direction
            right stick X controls rotation */
@@ -261,8 +261,8 @@ public class XeoTeleOP extends OpMode {
 
 
         if(gamepad2.a) { // inchidere
-            servoPozS = 0.2988;
-            servoPozD = 0.6411;
+            servoPozS = 0.26;
+            servoPozD = 0.67;
         }
         if(gamepad2.b) { // deschidere
             servoPozS = 0.4614;
