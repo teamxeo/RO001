@@ -5,6 +5,7 @@ import com.kauailabs.navx.ftc.navXPIDController;
 import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -30,9 +31,9 @@ import static java.lang.System.in;
 /**
  * Created by (for example John) on 2/14/2018.
  */
-
-@Autonomous(name = "AutonomieAlbastru2", group = "AutonomieAlbastru2")
-public class AutonomieAlbastru2 extends LinearOpMode {
+@Disabled
+@Autonomous(name = "setupAutonomie", group = "setupAutonomie")
+public class setupAutonomie extends LinearOpMode {
 
     public ModernRoboticsI2cRangeSensor rangeSensor;
     private final int NAVX_DIM_I2C_PORT = 0;
@@ -100,7 +101,7 @@ public class AutonomieAlbastru2 extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         terminat = false;
-        navx_device = AHRS.getInstance(hardwareMap.deviceInterfaceModule.get("dim"),
+       navx_device = AHRS.getInstance(hardwareMap.deviceInterfaceModule.get("dim"),
                 NAVX_DIM_I2C_PORT,
                 AHRS.DeviceDataType.kProcessedData,
                 NAVX_DEVICE_UPDATE_RATE_HZ);
@@ -143,12 +144,12 @@ public class AutonomieAlbastru2 extends LinearOpMode {
 
         }*/
 
-        while (!calibration_complete && !Thread.currentThread().isInterrupted()) {
+       /* while (!calibration_complete && !Thread.currentThread().isInterrupted()) {
             /* navX-Micro Calibration completes automatically ~15 seconds after it is
             powered on, as long as the device is still.  To handle the case where the
             navX-Micro has not been able to calibrate successfully, hold off using
             the navX-Micro Yaw value until calibration is complete.
-             */
+
 
             calibration_complete = !navx_device.isCalibrating();
             if (!calibration_complete) {
@@ -157,7 +158,7 @@ public class AutonomieAlbastru2 extends LinearOpMode {
             if (calibration_complete)
                 telemetry.addData("navX-Micro", "M-am calibrat");
             telemetry.update();
-        }
+        }*/
 
 
 
@@ -216,75 +217,7 @@ public class AutonomieAlbastru2 extends LinearOpMode {
 
         while (opModeIsActive() && ! terminat) {
 
-            zeroRoll = navx_device.getPitch();
-            prindeCub(ServS,ServD);
-            servoBile.setPosition(pozitieServoBileJos);
-            TimeUnit.MILLISECONDS.sleep(1000);
-            telemetry.addData("Rotatie: ", navx_device.getYaw());
-            telemetry.update();
-
-
-            if (colorSensor.blue() < colorSensor.red()) {
-
-                calibrareRampa(bilaDreapta ,  treshHold, vitezaIntoarcere);
-                servoBile.setPosition(1);
-                TimeUnit.MILLISECONDS.sleep(500);
-                calibrareRampa(5 , treshHold , vitezaIntoarcere);
-
-                // rotire(0 ,treshHold, vitezaIntoarcere);
-
-
-            } else if (colorSensor.red() < colorSensor.blue()) {
-
-                calibrareRampa(bilaStanga, treshHold, vitezaIntoarcere);      // am dat jos bila rosie
-                puneServo(1);
-                TimeUnit.MILLISECONDS.sleep(500);
-                //rotire(0 ,treshHold, vitezaIntoarcere);       // ma pun pe 0 grade
-                calibrareRampa(0,treshHold,vitezaIntoarcere);
-            }
-            else {
-                puneServo(1);
-            }
-            oprire();
-            TimeUnit.MILLISECONDS.sleep(500);
-            // formuleHolonom(navx_device.getYaw(),beta,vitezeHolonom);
-
-            da_teJosDePeRampa(vitezaMiscare-0.015 , zeroRoll, altInitial);
-            rotire(90,treshHold,vitezaIntoarcere);
-            mergiFata(-vitezaMiscare,0);
-             TimeUnit.MILLISECONDS.sleep(300);
-            //  mergiDreapta(vitezaMiscare);
-            // TimeUnit.MILLISECONDS.sleep(500);
-            //du_teLaRaft2(raft,vitezaMiscare-0.01);
-            du_teLaRaft(raft,vitezaMiscare -0.015);
-             mergiFata(vitezaMiscare,0);
-            TimeUnit.MILLISECONDS.sleep(500);
-            // mergiDreapta(vitezaMiscare);
-            // TimeUnit.MILLISECONDS.sleep(500);
-            //mergiFata(-vitezaMiscare, 0);
-            //  TimeUnit.MILLISECONDS.sleep(150);
-            rotire(0,treshHold,vitezaIntoarcere);
-            oprire();
-            //if(raft == 3) {
-            //    mergiDreapta(vitezaMiscare);
-            //    TimeUnit.MILLISECONDS.sleep(550);
-            // }
-            mergiFata(vitezaMiscare, 0);
-            TimeUnit.MILLISECONDS.sleep(1000);
-            oprire();
-            lasaCub(ServSLas,ServDLas);
-            TimeUnit.MILLISECONDS.sleep(500);
-            mergiFata(-vitezaMiscare, 0);
-            TimeUnit.MILLISECONDS.sleep(500);
-            mRid.setPower(-1);
-            TimeUnit.MILLISECONDS.sleep(500);
-            mRid.setPower(0);
-            inchideServo();
-            mergiFata(vitezaMiscare, 0);
-            TimeUnit.MILLISECONDS.sleep(1000);
-            mergiFata(-vitezaMiscare, 0);
-            TimeUnit.MILLISECONDS.sleep(500);
-            oprire();
+           setup();
 
             oprireTot();
 
@@ -297,6 +230,19 @@ public class AutonomieAlbastru2 extends LinearOpMode {
         }
         oprireTot();
     }
+
+    public void setup()throws InterruptedException {
+
+
+
+        mRid.setPower(1);
+        TimeUnit.MILLISECONDS.sleep(150);
+        mRid.setPower(0);
+        CubSJ.setPosition(1.0);
+        CubDJ.setPosition(0.0);
+
+    }
+
 
     public void calibrareRampa(double tinta , double treshHold ,double viteza) {
 
@@ -487,8 +433,14 @@ public class AutonomieAlbastru2 extends LinearOpMode {
 
     }
 
-   /* public void prindeCub(double stanga, double dreapta) throws InterruptedException {
+    public void prindeCub(double stanga, double dreapta) throws InterruptedException {
 
+        CubSJ.setPosition(0.4614);
+        CubDJ.setPosition(0.4785);
+        TimeUnit.MILLISECONDS.sleep(500);
+        mRid.setPower(-1);
+        TimeUnit.MILLISECONDS.sleep(500);
+        mRid.setPower(0);
         CubSJ.setPosition(stanga);
         CubDJ.setPosition(dreapta);
         TimeUnit.MILLISECONDS.sleep(500);
@@ -497,23 +449,7 @@ public class AutonomieAlbastru2 extends LinearOpMode {
         mRid.setPower(0);
 
     }
-*/
-   public void prindeCub(double stanga, double dreapta) throws InterruptedException {
 
-       CubSJ.setPosition(0.4614);
-       CubDJ.setPosition(0.4785);
-       TimeUnit.MILLISECONDS.sleep(300);
-       mRid.setPower(-1);
-       TimeUnit.MILLISECONDS.sleep(300);
-       mRid.setPower(0);
-       CubSJ.setPosition(stanga);
-       CubDJ.setPosition(dreapta);
-       TimeUnit.MILLISECONDS.sleep(500);
-       mRid.setPower(1);
-       TimeUnit.MILLISECONDS.sleep(500);
-       mRid.setPower(0);
-
-   }
     public void lasaCub(double stanga, double dreapta) throws InterruptedException {
         CubSJ.setPosition(stanga);
         CubDJ.setPosition(dreapta);
@@ -525,7 +461,7 @@ public class AutonomieAlbastru2 extends LinearOpMode {
 
 
 
-    public void da_teJosDePeRampa(double viteza, double rollInitial, double altInitial){
+    public void da_teJosDePeRampa(double viteza){
 
         mergiFata(viteza, 0);
 

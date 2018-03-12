@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -9,6 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
  * Created by (for example John) on 12/21/2017.
  */
 
+@Disabled
 @Autonomous(name = "Servo Sensor", group = "Sensor")
 public class Servo_Jewel extends LinearOpMode {
 

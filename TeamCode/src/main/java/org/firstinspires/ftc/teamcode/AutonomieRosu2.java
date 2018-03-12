@@ -5,6 +5,7 @@ import com.kauailabs.navx.ftc.navXPIDController;
 import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -30,7 +31,6 @@ import static java.lang.System.in;
 /**
  * Created by (for example John) on 2/14/2018.
  */
-
 @Autonomous(name = "AutonomieRosu2", group = "AutonomieRosu2")
 public class AutonomieRosu2 extends LinearOpMode {
 
@@ -63,7 +63,7 @@ public class AutonomieRosu2 extends LinearOpMode {
     int rotireDreapta = 1;
     int rotireStanga = -1;
     double vitezaIntoarcere = 0.07;
-    double bilaStanga = - 10;
+    double bilaStanga = -10;
     double bilaDreapta = 10;
     double treshHold = 2;
     double vitezaMiscare = 0.1;
@@ -84,7 +84,7 @@ public class AutonomieRosu2 extends LinearOpMode {
     double ServD = 0.67;
     double ServSLas = 0.4614;
     double ServDLas = 0.4785;
-    boolean terminat ;
+    boolean terminat;
     double distRaft1 = 107;
     double distRaft2 = 129;
     double distRaft3 = 148;
@@ -104,6 +104,7 @@ public class AutonomieRosu2 extends LinearOpMode {
                 NAVX_DIM_I2C_PORT,
                 AHRS.DeviceDataType.kProcessedData,
                 NAVX_DEVICE_UPDATE_RATE_HZ);
+
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
@@ -160,8 +161,6 @@ public class AutonomieRosu2 extends LinearOpMode {
         }
 
 
-
-
         rollInitial = navx_device.getPitch();
         telemetry.addData("Roll: ", rollInitial);
         telemetry.addLine();
@@ -174,22 +173,21 @@ public class AutonomieRosu2 extends LinearOpMode {
         RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
 
 
-
         while (!opModeIsActive() && !Thread.currentThread().isInterrupted()) {
             vuMark = RelicRecoveryVuMark.from(relicTemplate);
             switch (vuMark) {
 
                 case LEFT:
-                    raft = 2;
+                    raft = 4;
                     break;
                 case CENTER:
                     raft = 3;
                     break;
                 case RIGHT:
-                    raft = 4;
+                    raft = 2;
                     break;
                 default:
-                    raft = 4;
+                    raft = 3;
                     break;
 
 
@@ -213,12 +211,12 @@ public class AutonomieRosu2 extends LinearOpMode {
         }
 
 
-
-        while (opModeIsActive() && ! terminat) {
+        while (opModeIsActive() && !terminat) {
 
             zeroRoll = navx_device.getPitch();
-            prindeCub(ServS,ServD);
             servoBile.setPosition(pozitieServoBileJos);
+            prindeCub(ServS, ServD);
+
             TimeUnit.MILLISECONDS.sleep(1000);
             telemetry.addData("Rotatie: ", navx_device.getYaw());
             telemetry.update();
@@ -226,10 +224,10 @@ public class AutonomieRosu2 extends LinearOpMode {
 
             if (colorSensor.blue() > colorSensor.red()) {
 
-                calibrareRampa(bilaDreapta ,  treshHold, vitezaIntoarcere);
+                calibrareRampa(bilaDreapta, treshHold, vitezaIntoarcere);
                 servoBile.setPosition(1);
                 TimeUnit.MILLISECONDS.sleep(500);
-                calibrareRampa(5 , treshHold , vitezaIntoarcere);
+                calibrareRampa(5, treshHold, vitezaIntoarcere);
 
                 // rotire(0 ,treshHold, vitezaIntoarcere);
 
@@ -240,33 +238,35 @@ public class AutonomieRosu2 extends LinearOpMode {
                 puneServo(1);
                 TimeUnit.MILLISECONDS.sleep(500);
                 //rotire(0 ,treshHold, vitezaIntoarcere);       // ma pun pe 0 grade
-                calibrareRampa(0,treshHold,vitezaIntoarcere);
-            }
-            else {
+                calibrareRampa(0, treshHold, vitezaIntoarcere);
+            } else {
                 puneServo(1);
             }
             oprire();
-           /* TimeUnit.MILLISECONDS.sleep(500);
+            TimeUnit.MILLISECONDS.sleep(500);
             // formuleHolonom(navx_device.getYaw(),beta,vitezeHolonom);
 
             //da_teJosDePeRampa(-vitezaMiscare+0.015 , zeroRoll, altInitial);
-            mergiFata(-0.1,0);
-            TimeUnit.MILLISECONDS.sleep(1700);
-            rotire(-90,treshHold,vitezaIntoarcere);
-            mergiFata(0.1,0);
-            TimeUnit.MILLISECONDS.sleep(1000);
+            mergiFata(-0.1, 0);
+            TimeUnit.MILLISECONDS.sleep(1900);
+            rotire(-90, treshHold, vitezaIntoarcere);
+            mergiFata(0.1, 0);
+            TimeUnit.MILLISECONDS.sleep(2000);
             oprire();
             TimeUnit.MILLISECONDS.sleep(200);
             //  mergiDreapta(vitezaMiscare);
             // TimeUnit.MILLISECONDS.sleep(500);
             //du_teLaRaft2(raft,vitezaMiscare-0.01);
-            du_teLaRaft(raft,-vitezaMiscare);
-            // mergiFata(vitezaMiscare);
-            //TimeUnit.MILLISECONDS.sleep(300);
+            pune_teFataDeRaft(42, 'd');
+            du_teLaRaft(raft, -vitezaMiscare);
+
+           //  mergiFata(-vitezaMiscare,0);
+           // TimeUnit.MILLISECONDS.sleep(300);
             // mergiDreapta(vitezaMiscare);
             // TimeUnit.MILLISECONDS.sleep(500);
             //mergiFata(-vitezaMiscare, 0);
             //  TimeUnit.MILLISECONDS.sleep(150);
+            //rotire(-180, treshHold, vitezaIntoarcere);
             rotireSpeciala(-180,treshHold,vitezaIntoarcere);
             oprire();
             //if(raft == 3) {
@@ -274,18 +274,18 @@ public class AutonomieRosu2 extends LinearOpMode {
             //    TimeUnit.MILLISECONDS.sleep(550);
             // }
             mergiFata(vitezaMiscare, 0);
-            TimeUnit.MILLISECONDS.sleep(2000);
+            TimeUnit.MILLISECONDS.sleep(1000);
             oprire();
-            lasaCub(ServSLas,ServDLas);
+            lasaCub(ServSLas, ServDLas);
             TimeUnit.MILLISECONDS.sleep(500);
             mergiFata(-vitezaMiscare, 0);
-            TimeUnit.MILLISECONDS.sleep(1000);
+            TimeUnit.MILLISECONDS.sleep(500);
             mRid.setPower(-1);
             TimeUnit.MILLISECONDS.sleep(500);
             mRid.setPower(0);
             inchideServo();
             mergiFata(vitezaMiscare, 0);
-            TimeUnit.MILLISECONDS.sleep(2000);
+            TimeUnit.MILLISECONDS.sleep(1000);
             mergiFata(-vitezaMiscare, 0);
             TimeUnit.MILLISECONDS.sleep(500);
             oprire();
@@ -297,20 +297,19 @@ public class AutonomieRosu2 extends LinearOpMode {
             //telemetry.addData("Red ", colorSensor.red());
             //telemetry.addLine();
             //telemetry.addLine(Double.toString(servo.getPosition()));
-            */
+
             terminat = true;
         }
         oprireTot();
     }
 
-    public void calibrareRampa(double tinta , double treshHold ,double viteza) {
+    public void calibrareRampa(double tinta, double treshHold, double viteza) {
 
 
         double mergiStanga = viteza;
         double mergiDreapta = -viteza;
 
         while (navx_device.getYaw() >= tinta + treshHold && opModeIsActive()) {      // cat timp sunt in dreapta tintei vreau sa merg in stanga
-
 
 
             telemetry.addData("Rotatie: ", navx_device.getYaw());
@@ -321,7 +320,6 @@ public class AutonomieRosu2 extends LinearOpMode {
             telemetry.update();
 
 
-
             motorFrontLeft.setPower(mergiStanga);
             motorFrontRight.setPower(mergiStanga);
             motorBackRight.setPower(mergiStanga);
@@ -330,7 +328,7 @@ public class AutonomieRosu2 extends LinearOpMode {
         oprire();
 
 
-        while(navx_device.getYaw() <= tinta - treshHold && opModeIsActive()) {    // cat timp sunt in partea stanga a tintei vreau sa merg in dreapta
+        while (navx_device.getYaw() <= tinta - treshHold && opModeIsActive()) {    // cat timp sunt in partea stanga a tintei vreau sa merg in dreapta
 
             telemetry.addData("Rotatie: ", navx_device.getYaw());
             telemetry.addLine();
@@ -349,16 +347,15 @@ public class AutonomieRosu2 extends LinearOpMode {
     }
 
 
-
     public void formuleHolonom(double alpha, double beta, double[] vitezeHolonom) {
 
-        double xM, yM, scale=0.1;
-        xM = ( Math.cos(alpha) + 1 )/2;
-        yM = Math.sin(alpha)/2;
-        vitezeHolonom[0] = scale*(-xM-yM);
-        vitezeHolonom[1] = scale*(-xM+yM);
-        vitezeHolonom[2] = scale*(xM+yM);
-        vitezeHolonom[3] = scale*(+xM-yM);
+        double xM, yM, scale = 0.1;
+        xM = (Math.cos(alpha) + 1) / 2;
+        yM = Math.sin(alpha) / 2;
+        vitezeHolonom[0] = scale * (-xM - yM);
+        vitezeHolonom[1] = scale * (-xM + yM);
+        vitezeHolonom[2] = scale * (xM + yM);
+        vitezeHolonom[3] = scale * (+xM - yM);
 
     }
 
@@ -372,11 +369,11 @@ public class AutonomieRosu2 extends LinearOpMode {
     public void rotire(double tinta, double treshHold, double viteza) throws InterruptedException {
         int incercari = 0;
         boolean suntPeTinta = false;
-        while(!suntPeTinta && opModeIsActive()) {
+        while (!suntPeTinta && opModeIsActive()) {
             double mergiStanga = viteza;
             double mergiDreapta = -viteza;
 
-            while(navx_device.getYaw() >= tinta + treshHold && opModeIsActive()){      // cat timp sunt in dreapta tintei vreau sa merg in stanga
+            while (navx_device.getYaw() >= tinta + treshHold && opModeIsActive()) {      // cat timp sunt in dreapta tintei vreau sa merg in stanga
                 telemetry.addData("Rotatie: ", navx_device.getYaw());
                 telemetry.addLine();
                 telemetry.addData("incercari:", incercari);
@@ -394,11 +391,11 @@ public class AutonomieRosu2 extends LinearOpMode {
             TimeUnit.MILLISECONDS.sleep(500);
 
 
-            if( navx_device.getYaw() >= tinta - treshHold && navx_device.getYaw() <= tinta + treshHold)     // daca sunt pe o parte sau o alta a tintei si in limitele tresholdului ma opresc
+            if (navx_device.getYaw() >= tinta - treshHold && navx_device.getYaw() <= tinta + treshHold)     // daca sunt pe o parte sau o alta a tintei si in limitele tresholdului ma opresc
                 suntPeTinta = true;
 
-            if(!suntPeTinta){     // daca nu m-am pozitionat bine, incerc sa merg in dreapta. Robotul nu se poate opri decat in limitele treshHoldului sau in partea stanga
-                while(navx_device.getYaw() <= tinta - treshHold && opModeIsActive()) {    // cat timp sunt in partea stanga a tintei vreau sa merg in dreapta
+            if (!suntPeTinta) {     // daca nu m-am pozitionat bine, incerc sa merg in dreapta. Robotul nu se poate opri decat in limitele treshHoldului sau in partea stanga
+                while (navx_device.getYaw() <= tinta - treshHold && opModeIsActive()) {    // cat timp sunt in partea stanga a tintei vreau sa merg in dreapta
 
                     telemetry.addData("Rotatie: ", navx_device.getYaw());
                     telemetry.addLine();
@@ -418,34 +415,34 @@ public class AutonomieRosu2 extends LinearOpMode {
                 TimeUnit.MILLISECONDS.sleep(500);
             }
 
-            if( navx_device.getYaw() >= tinta - treshHold && navx_device.getYaw() <= tinta + treshHold)   // daca sunt pe o parte sau o alta a tintei si in limitele tresholdului ma opresc
+            if (navx_device.getYaw() >= tinta - treshHold && navx_device.getYaw() <= tinta + treshHold)   // daca sunt pe o parte sau o alta a tintei si in limitele tresholdului ma opresc
                 suntPeTinta = true;
 
 
             incercari++;
-            if(incercari % 2 == 0 && incercari != 0){   // daca dupa doua incercari nu a reusit, il ajut putin . O incercare inseamna o rotire spre stanga si o rotire spre dreapta sau viceversa
+            if (incercari % 2 == 0 && incercari != 0) {   // daca dupa doua incercari nu a reusit, il ajut putin . O incercare inseamna o rotire spre stanga si o rotire spre dreapta sau viceversa
                 // treshHold += 0.5;
                 viteza -= 0.01;
             }
 
-            if(suntPeTinta)
+            if (suntPeTinta)
                 oprire();
 
         }
 
 
-
     }
 
-    public void rotireSpeciala (double tinta, double treshHold, double viteza) throws InterruptedException {
+    public void rotireSpeciala(double tinta, double treshHold, double viteza) throws InterruptedException {
 
         int incercari = 0;
         boolean suntPeTinta = false;
-        while(!suntPeTinta && opModeIsActive()) {
+        boolean amTrecut;
+        while (!suntPeTinta && opModeIsActive()) {
             double mergiStanga = viteza;
             double mergiDreapta = -viteza;
-
-            while(navx_device.getYaw() >= tinta + treshHold && opModeIsActive()){      // cat timp sunt in dreapta tintei vreau sa merg in stanga
+            amTrecut = false;
+            while (navx_device.getYaw() >= tinta + treshHold && opModeIsActive() && !amTrecut) {      // cat timp sunt in dreapta tintei vreau sa merg in stanga
                 telemetry.addData("Rotatie: ", navx_device.getYaw());
                 telemetry.addLine();
                 telemetry.addData("incercari:", incercari);
@@ -458,16 +455,20 @@ public class AutonomieRosu2 extends LinearOpMode {
                 motorFrontRight.setPower(mergiStanga);
                 motorBackRight.setPower(mergiStanga);
                 motorBackLeft.setPower(mergiStanga);
+                if (navx_device.getYaw() >= 0)
+                    amTrecut = true;
             }
             oprire();
             TimeUnit.MILLISECONDS.sleep(500);
 
 
-            if( -Math.abs(navx_device.getYaw()) >= tinta - treshHold && navx_device.getYaw() <= tinta + treshHold)     // daca sunt pe o parte sau o alta a tintei si in limitele tresholdului ma opresc
+            if (navx_device.getYaw() >= 180 - treshHold || navx_device.getYaw() <= tinta + treshHold) {    // daca sunt pe o parte sau o alta a tintei si in limitele tresholdului ma opresc
                 suntPeTinta = true;
 
-            if(!suntPeTinta){     // daca nu m-am pozitionat bine, incerc sa merg in dreapta. Robotul nu se poate opri decat in limitele treshHoldului sau in partea stanga
-                while(navx_device.getYaw() <= tinta - treshHold && opModeIsActive()) {    // cat timp sunt in partea stanga a tintei vreau sa merg in dreapta
+            }
+            amTrecut = false;
+            if (!suntPeTinta) {     // daca nu m-am pozitionat bine, incerc sa merg in dreapta. Robotul nu se poate opri decat in limitele treshHoldului sau in partea stanga
+                while (navx_device.getYaw() <= -tinta - treshHold && opModeIsActive() && !amTrecut) {    // cat timp sunt in partea stanga a tintei vreau sa merg in dreapta
 
                     telemetry.addData("Rotatie: ", navx_device.getYaw());
                     telemetry.addLine();
@@ -482,22 +483,105 @@ public class AutonomieRosu2 extends LinearOpMode {
                     motorFrontRight.setPower(mergiDreapta);
                     motorBackRight.setPower(mergiDreapta);
                     motorBackLeft.setPower(mergiDreapta);
+                    if (navx_device.getYaw() >= -180 && navx_device.getYaw() <= -160)
+                        amTrecut = true;
                 }
                 oprire();
                 TimeUnit.MILLISECONDS.sleep(500);
             }
 
-            if( -Math.abs(navx_device.getYaw()) >= tinta - treshHold && navx_device.getYaw() <= tinta + treshHold)   // daca sunt pe o parte sau o alta a tintei si in limitele tresholdului ma opresc
+            if (navx_device.getYaw() >= 180 - treshHold || navx_device.getYaw() <= tinta + treshHold)   // daca sunt pe o parte sau o alta a tintei si in limitele tresholdului ma opresc
                 suntPeTinta = true;
-
+            amTrecut = false;
 
             incercari++;
-            if(incercari % 2 == 0 && incercari != 0){   // daca dupa doua incercari nu a reusit, il ajut putin . O incercare inseamna o rotire spre stanga si o rotire spre dreapta sau viceversa
+            if (incercari % 2 == 0 && incercari != 0) {   // daca dupa doua incercari nu a reusit, il ajut putin . O incercare inseamna o rotire spre stanga si o rotire spre dreapta sau viceversa
                 // treshHold += 0.5;
                 viteza -= 0.01;
             }
 
-            if(suntPeTinta)
+            if (suntPeTinta)
+                oprire();
+
+        }
+
+    }
+
+    public void rotireSpeciala2(double tinta, double treshHold, double viteza) throws InterruptedException {
+
+        int incercari = 0;
+        boolean suntPeTinta = false;
+        boolean amTrecut;
+        while (!suntPeTinta && opModeIsActive()) {
+            double mergiStanga = viteza;
+            double mergiDreapta = -viteza;
+            amTrecut = false;
+            while (navx_device.getYaw() >= tinta + treshHold && opModeIsActive() && !amTrecut) {      // cat timp sunt in dreapta tintei vreau sa merg in stanga
+                telemetry.addData("Rotatie: ", navx_device.getYaw());
+                telemetry.addLine();
+                telemetry.addData("incercari:", incercari);
+                telemetry.addLine();
+                telemetry.addData("treshhold:", treshHold);
+                telemetry.addLine();
+                telemetry.addData("viteza:", viteza);
+                telemetry.update();
+                motorFrontLeft.setPower(mergiStanga);
+                motorFrontRight.setPower(mergiStanga);
+                motorBackRight.setPower(mergiStanga);
+                motorBackLeft.setPower(mergiStanga);
+                double unghi1 = navx_device.getYaw();
+                TimeUnit.MILLISECONDS.sleep(100);
+                double unghi2 = navx_device.getYaw();
+                if (unghi2 > unghi1)
+                    amTrecut = true;
+
+            }
+            oprire();
+            TimeUnit.MILLISECONDS.sleep(500);
+
+
+            if (navx_device.getYaw() >= 180 - treshHold && navx_device.getYaw() <= tinta + treshHold) {    // daca sunt pe o parte sau o alta a tintei si in limitele tresholdului ma opresc
+                suntPeTinta = true;
+
+            }
+            amTrecut = false;
+            if (!suntPeTinta) {     // daca nu m-am pozitionat bine, incerc sa merg in dreapta. Robotul nu se poate opri decat in limitele treshHoldului sau in partea stanga
+                while (navx_device.getYaw() <= 180 - treshHold && opModeIsActive() && !amTrecut) {    // cat timp sunt in partea stanga a tintei vreau sa merg in dreapta
+
+                    telemetry.addData("Rotatie: ", navx_device.getYaw());
+                    telemetry.addLine();
+                    telemetry.addData("incercari:", incercari);
+                    telemetry.addLine();
+                    telemetry.addData("treshhold:", treshHold);
+                    telemetry.addLine();
+                    telemetry.addData("viteza:", viteza);
+                    telemetry.update();
+
+                    motorFrontLeft.setPower(mergiDreapta);
+                    motorFrontRight.setPower(mergiDreapta);
+                    motorBackRight.setPower(mergiDreapta);
+                    motorBackLeft.setPower(mergiDreapta);
+                    double unghi1 = navx_device.getYaw();
+                    TimeUnit.MILLISECONDS.sleep(100);
+                    double unghi2 = navx_device.getYaw();
+                    if (unghi2 < unghi1)
+                        amTrecut = true;
+                }
+                oprire();
+                TimeUnit.MILLISECONDS.sleep(500);
+            }
+
+            if (navx_device.getYaw() >= 180 - treshHold && navx_device.getYaw() <= tinta + treshHold)   // daca sunt pe o parte sau o alta a tintei si in limitele tresholdului ma opresc
+                suntPeTinta = true;
+            amTrecut = false;
+
+            incercari++;
+            if (incercari % 2 == 0 && incercari != 0) {   // daca dupa doua incercari nu a reusit, il ajut putin . O incercare inseamna o rotire spre stanga si o rotire spre dreapta sau viceversa
+                // treshHold += 0.5;
+                viteza -= 0.01;
+            }
+
+            if (suntPeTinta)
                 oprire();
 
         }
@@ -505,26 +589,26 @@ public class AutonomieRosu2 extends LinearOpMode {
     }
 
 
-    public void mergiFata(double viteza, double plus){
+    public void mergiFata(double viteza, double plus) {
         motorFrontLeft.setPower(-viteza);
         motorFrontRight.setPower(viteza + plus);
-        motorBackRight.setPower(viteza );
+        motorBackRight.setPower(viteza);
         motorBackLeft.setPower(-viteza - plus);
     }
 
-    public void mergiDreapta(double viteza){
+    public void mergiDreapta(double viteza) {
         motorFrontLeft.setPower(viteza);
         motorFrontRight.setPower(viteza);
         motorBackRight.setPower(-viteza);
         motorBackLeft.setPower(-viteza);
     }
 
-    public void du_teLaRaft(int raft, double viteza) throws InterruptedException{
+    public void du_teLaRaft(int raft, double viteza) throws InterruptedException {
 
         double dist1 = rangeSensor.getDistance(DistanceUnit.CM);
         double dist2 = dist1;
         mergiFata(viteza, 0);
-        do{
+        do {
 
             telemetry.addLine();
             telemetry.addData("distanta initiala:", dist1);
@@ -534,16 +618,16 @@ public class AutonomieRosu2 extends LinearOpMode {
 
             dist2 = rangeSensor.getDistance(DistanceUnit.CM);
 
-            if(dist1 - dist2 > 5) {
+            if (dist1 - dist2 > 5) {
 
                 raft--;
-                if(raft != 0)
+                if (raft != 0)
                     TimeUnit.MILLISECONDS.sleep(1000);
                 telemetry.addData("sunt la raftul:", raft);
                 telemetry.update();
             }
 
-        }while(raft > 0 && opModeIsActive());
+        } while (raft > 0 && opModeIsActive());
 
         oprire();
 
@@ -559,8 +643,24 @@ public class AutonomieRosu2 extends LinearOpMode {
 
     }
 
+    /* public void prindeCub(double stanga, double dreapta) throws InterruptedException {
+
+         CubSJ.setPosition(stanga);
+         CubDJ.setPosition(dreapta);
+         TimeUnit.MILLISECONDS.sleep(500);
+         mRid.setPower(1);
+         TimeUnit.MILLISECONDS.sleep(500);
+         mRid.setPower(0);
+
+     }*/
     public void prindeCub(double stanga, double dreapta) throws InterruptedException {
 
+        CubSJ.setPosition(0.4614);
+        CubDJ.setPosition(0.4785);
+        TimeUnit.MILLISECONDS.sleep(150);
+        mRid.setPower(-1);
+        TimeUnit.MILLISECONDS.sleep(150);
+        mRid.setPower(0);
         CubSJ.setPosition(stanga);
         CubDJ.setPosition(dreapta);
         TimeUnit.MILLISECONDS.sleep(500);
@@ -575,72 +675,95 @@ public class AutonomieRosu2 extends LinearOpMode {
         CubDJ.setPosition(dreapta);
     }
 
-    public void puneServo(double poz){
+    public void puneServo(double poz) {
         servoBile.setPosition(poz);
     }
 
 
-
-    public void da_teJosDePeRampa(double viteza, double rollInitial, double altInitial){
+    public void da_teJosDePeRampa(double viteza, double rollInitial, double altInitial) {
 
         mergiFata(viteza, 0);
 
         double treshHold = .2;
-        while (Math.abs(navx_device.getPitch()) <= 10 && opModeIsActive()) {idle();}
-        while(Math.abs(navx_device.getPitch()) >= 4 && opModeIsActive()) {
+        while (Math.abs(navx_device.getPitch()) <= 10 && opModeIsActive()) {
+            idle();
+        }
+        while (Math.abs(navx_device.getPitch()) >= 4 && opModeIsActive()) {
             telemetry.addData("Roll: ", Math.abs(navx_device.getPitch()));
             telemetry.update();
         }
         oprire();
     }
 
-    public void puneServoTreptat(Servo servo , double tinta, double pozInitial){
+    public void puneServoTreptat(Servo servo, double tinta, double pozInitial) {
 
-        while(servo.getPosition() > tinta) {
+        while (servo.getPosition() > tinta) {
             servo.setPosition(pozInitial);
             pozInitial -= 0.005;
         }
 
     }
-    public void du_teLaRaft2(int raft, double viteza){
+
+    public void du_teLaRaft2(int raft, double viteza) {
         double tinta;
-        switch(raft) {
+        switch (raft) {
 
             case 1:
-                tinta=distRaft1;
+                tinta = distRaft1;
                 break;
             case 2:
-                tinta=distRaft2;
+                tinta = distRaft2;
                 break;
             case 3:
-                tinta=distRaft3;
+                tinta = distRaft3;
                 break;
             default:
-                tinta=distRaft1;
+                tinta = distRaft1;
 
         }
 
         double distantaCurenta = rangeSensor.getDistance(DistanceUnit.CM);
-        while(distantaCurenta < tinta)
-        {
+        while (distantaCurenta < tinta) {
             distantaCurenta = rangeSensor.getDistance(DistanceUnit.CM);
             mergiDreapta(viteza);
-            telemetry.addData("distanta Curenta :",distantaCurenta);
+            telemetry.addData("distanta Curenta :", distantaCurenta);
             telemetry.update();
         }
         oprire();
     }
 
-    public void oprire(){
+    public void oprire() {
         motorFrontLeft.setPower(0);
         motorFrontRight.setPower(0);
         motorBackLeft.setPower(0);
         motorBackRight.setPower(0);
     }
 
-    public void inchideServo(){
+    public void inchideServo() {
         CubSJ.setPosition(ServS);
         CubDJ.setPosition(ServD);
     }
 
+    public void pune_teFataDeRaft(double tinta, char directie) throws InterruptedException {
+        if (rangeSensor.getDistance(DistanceUnit.CM) > tinta) {
+            while (rangeSensor.getDistance(DistanceUnit.CM) > tinta) {
+                if (directie == 's')
+                    mergiDreapta(-vitezaMiscare);
+                if (directie == 'd')
+                    mergiDreapta(vitezaMiscare);
+            }
+
+        } else {
+            while (rangeSensor.getDistance(DistanceUnit.CM) < tinta) {
+                if (directie == 's')
+                    mergiDreapta(-vitezaMiscare);
+                if (directie == 'd')
+                    mergiDreapta(vitezaMiscare);
+
+            }
+
+        }
+        oprire();
+
+    }
 }

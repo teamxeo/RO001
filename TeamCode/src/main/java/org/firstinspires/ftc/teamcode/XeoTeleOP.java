@@ -38,11 +38,11 @@ public class XeoTeleOP extends OpMode {
     Servo   relicRidicare;
     //IntegratingGyroscope gyro;
    // NavxMicroNavigationSensor navxMicro;
-    Servo   servoBile;
+    //Servo   servoBile;
 
     private double servoPoz = 0.68;
-    private double servoPozS = 0.32;
-    private double servoPozD = 0.62;
+    private double servoPozS = 0.26;
+    private double servoPozD = 0.67;
     private double motorPower = 0.3;
     private double relicMotorPower = 1;
     double timp;
@@ -56,6 +56,7 @@ public class XeoTeleOP extends OpMode {
     boolean apasat = false;
     double pozDeschidere = 0.6792;
     double pozInchidere = 0.5926;
+    double defaultt = motorPower;
    // public ModernRoboticsI2cRangeSensor rangeSensor;
     // A timer helps provide feedback while calibration is taking place
     ElapsedTime timer = new ElapsedTime();
@@ -105,8 +106,8 @@ public class XeoTeleOP extends OpMode {
       //  navxMicro = hardwareMap.get(NavxMicroNavigationSensor.class, "navx");
        // gyro = (IntegratingGyroscope)navxMicro;
         profil=1;
-        servoBile = hardwareMap.servo.get("servo bile");
-        servoBile.setPosition(1);
+        //servoBile = hardwareMap.servo.get("servo bile");
+        //servoBile.setPosition(1);
       //  rangeSensor = (ModernRoboticsI2cRangeSensor) hardwareMap.opticalDistanceSensor.get("sensor_distance");
         telemetry.log().add("Gyro Calibrating. Do Not Move!");
 
@@ -126,7 +127,7 @@ public class XeoTeleOP extends OpMode {
     @Override
     public void loop() {        //functie loop, se repeta continuu, de la apasarea start pana la apasarea stop
 
-        servoBile.setPosition(1);
+        //servoBile.setPosition(1);
         //telemetry.addData("distanta", rangeSensor.getDistance(DistanceUnit.CM));
        // telemetry.update();
         /** ----------------------------- <miscare> ----------------------------- */
@@ -195,17 +196,28 @@ public class XeoTeleOP extends OpMode {
 
 
             //mecanumDrive_Cartesian(gamepad1.left_stick_x,gamepad1.left_stick_y,gamepad1.right_stick_x,angles.firstAngle, motorPower);
-
+                // bumper dreapta - 0.65
+                //bumper stanga  - 0.15
+                //default  - 0.3
             //cutie viteze miscare
             if (gamepad1.y) {
-                motorPower = 0.5;
+                defaultt = 0.5;
             }
             if (gamepad1.a) {
-                motorPower = 0.15;
+                defaultt = 0.15;
             }
             if (gamepad1.x) {
-                motorPower = 0.3;
+                defaultt = 0.3;
             }
+
+            if(gamepad1.right_trigger !=0)
+                motorPower = 0.65;
+            else
+            if(gamepad1.left_trigger != 0)
+                motorPower = 0.10;
+            else
+            if(gamepad1.right_trigger == 0 && gamepad1.left_trigger == 0)
+                motorPower = defaultt;
 
         //cod fata spate dreapta stanga
             if (gamepad1.dpad_up)
@@ -261,8 +273,8 @@ public class XeoTeleOP extends OpMode {
 
 
         if(gamepad2.a) { // inchidere
-            servoPozS = 0.26;
-            servoPozD = 0.67;
+            servoPozS = 0.28;
+            servoPozD = 0.65;
         }
         if(gamepad2.b) { // deschidere
             servoPozS = 0.4614;
@@ -370,7 +382,7 @@ public class XeoTeleOP extends OpMode {
 
     public void oprireServo() {
 
-        servoBile.close();
+        //servoBile.close();
         servoRidD_0.close();
         servoRidS_0.close();
         servoRidD_1.close();

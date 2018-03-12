@@ -249,7 +249,7 @@ public class AutonomieAlbastru1 extends LinearOpMode {
             TimeUnit.MILLISECONDS.sleep(500);
            // formuleHolonom(navx_device.getYaw(),beta,vitezeHolonom);
 
-            da_teJosDePeRampa(vitezaMiscare-0.015 , zeroRoll, altInitial);
+            da_teJosDePeRampa(vitezaMiscare-0.015);
             rotire(0,treshHold,vitezaIntoarcere);
           //  mergiDreapta(vitezaMiscare);
            // TimeUnit.MILLISECONDS.sleep(500);
@@ -485,8 +485,25 @@ public class AutonomieAlbastru1 extends LinearOpMode {
 
     }
 
+    /*public void prindeCub(double stanga, double dreapta) throws InterruptedException {
+
+        CubSJ.setPosition(stanga);
+        CubDJ.setPosition(dreapta);
+        TimeUnit.MILLISECONDS.sleep(500);
+        mRid.setPower(1);
+        TimeUnit.MILLISECONDS.sleep(500);
+        mRid.setPower(0);
+
+    }*/
+
     public void prindeCub(double stanga, double dreapta) throws InterruptedException {
 
+        CubSJ.setPosition(0.4614);
+        CubDJ.setPosition(0.4785);
+        TimeUnit.MILLISECONDS.sleep(150);
+        mRid.setPower(-1);
+        TimeUnit.MILLISECONDS.sleep(150);
+        mRid.setPower(0);
         CubSJ.setPosition(stanga);
         CubDJ.setPosition(dreapta);
         TimeUnit.MILLISECONDS.sleep(500);
@@ -507,7 +524,7 @@ public class AutonomieAlbastru1 extends LinearOpMode {
 
 
 
-    public void da_teJosDePeRampa(double viteza, double rollInitial, double altInitial){
+    public void da_teJosDePeRampa(double viteza){
 
        mergiFata(viteza, 0);
 

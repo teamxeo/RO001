@@ -201,14 +201,7 @@ public class AutonomieRosu1 extends LinearOpMode {
             telemetry.addLine();
             telemetry.addData("Rosu: ", colorSensor.red());
             telemetry.addLine();
-            telemetry.addData("distanta initiala:", rangeSensor.getDistance(DistanceUnit.CM));
-            //telemetry.addData("Altitudine: ", navx_device.getAltitude());
-            telemetry.addData("Roll: ", navx_device.getPitch());
-            telemetry.addLine();
             telemetry.addData("VuMark:", vuMark);
-
-            telemetry.addData("poz servo", CubSJ.getPosition());
-            telemetry.update();
 
         }
 
@@ -488,10 +481,28 @@ public class AutonomieRosu1 extends LinearOpMode {
         colorSensor.close();
         oprire();
 
+
     }
+
+   /* public void prindeCub(double stanga, double dreapta) throws InterruptedException {
+
+        CubSJ.setPosition(stanga);
+        CubDJ.setPosition(dreapta);
+        TimeUnit.MILLISECONDS.sleep(500);
+        mRid.setPower(1);
+        TimeUnit.MILLISECONDS.sleep(500);
+        mRid.setPower(0);
+
+    }*/
 
     public void prindeCub(double stanga, double dreapta) throws InterruptedException {
 
+        CubSJ.setPosition(0.4614);
+        CubDJ.setPosition(0.4785);
+        TimeUnit.MILLISECONDS.sleep(150);
+        mRid.setPower(-1);
+        TimeUnit.MILLISECONDS.sleep(150);
+        mRid.setPower(0);
         CubSJ.setPosition(stanga);
         CubDJ.setPosition(dreapta);
         TimeUnit.MILLISECONDS.sleep(500);
