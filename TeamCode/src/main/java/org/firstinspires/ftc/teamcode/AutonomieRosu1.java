@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.kauailabs.navx.ftc.AHRS;
 import com.kauailabs.navx.ftc.navXPIDController;
+import com.qualcomm.hardware.adafruit.AdafruitI2cColorSensor;
 import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -88,12 +89,16 @@ public class AutonomieRosu1 extends LinearOpMode {
     double distRaft1 = 107;
     double distRaft2 = 129;
     double distRaft3 = 148;
+    double bilaAlbastra = 150;
+    static final int LED_CHANNEL = 5;
+    double bilaRosie = 200;
     public static final String TAG = "Vuforia VuMark Sample";
 
     OpenGLMatrix lastLocation = null;
 
     //Servo servo = hardwareMap.servo.get("servo_jewel");
-    ColorSensor colorSensor;
+    AdafruitI2cColorSensor colorSensor;
+    ColorSensor colorSensorPrioritar;
 
     VuforiaLocalizer vuforia;
 
@@ -121,7 +126,8 @@ public class AutonomieRosu1 extends LinearOpMode {
         motorFrontLeft = hardwareMap.dcMotor.get("motor front left");
         motorBackLeft = hardwareMap.dcMotor.get("motor back left");
         motorBackRight = hardwareMap.dcMotor.get("motor back right");
-        colorSensor = hardwareMap.colorSensor.get("color_sensor");
+        colorSensor = (AdafruitI2cColorSensor) hardwareMap.get("color_sensor");
+        colorSensorPrioritar = hardwareMap.colorSensor.get("color_sensor_2");
         servoBile = hardwareMap.servo.get("servo bile");
         CubSJ = hardwareMap.servo.get("servo rid s 0");
         CubDJ = hardwareMap.servo.get("servo rid d 0");
@@ -189,7 +195,7 @@ public class AutonomieRosu1 extends LinearOpMode {
                     raft = 3;
                     break;
                 default:
-                    raft = 3;
+                    raft = 1;
                     break;
 
 
@@ -201,7 +207,14 @@ public class AutonomieRosu1 extends LinearOpMode {
             telemetry.addLine();
             telemetry.addData("Rosu: ", colorSensor.red());
             telemetry.addLine();
+            telemetry.addData("distanta initiala:", rangeSensor.getDistance(DistanceUnit.CM));
+            //telemetry.addData("Altitudine: ", navx_device.getAltitude());
+            telemetry.addData("Roll: ", navx_device.getPitch());
+            telemetry.addLine();
             telemetry.addData("VuMark:", vuMark);
+
+            telemetry.addData("poz servo", CubSJ.getPosition());
+            telemetry.update();
 
         }
 
@@ -217,26 +230,49 @@ public class AutonomieRosu1 extends LinearOpMode {
             telemetry.update();
 
 
-            if (colorSensor.blue() > colorSensor.red()) {
-
-                calibrareRampa(bilaDreapta ,  treshHold, vitezaIntoarcere);
-                servoBile.setPosition(1);
-                TimeUnit.MILLISECONDS.sleep(500);
-                calibrareRampa(5 , treshHold , vitezaIntoarcere);
-
-                // rotire(0 ,treshHold, vitezaIntoarcere);
-
-
-            } else if (colorSensor.red() > colorSensor.blue()) {
-                calibrareRampa(bilaStanga, treshHold, vitezaIntoarcere);      // am dat jos bila rosie
+            if (colorSensorPrioritar.red() > colorSensorPrioritar.blue()) {
+                calibrareRampa(bilaDreapta, treshHold, vitezaIntoarcere);      // am dat jos bila rosie
                 puneServo(1);
                 TimeUnit.MILLISECONDS.sleep(500);
                 //rotire(0 ,treshHold, vitezaIntoarcere);       // ma pun pe 0 grade
                 calibrareRampa(0,treshHold,vitezaIntoarcere);
+
+
+
+                // rotire(0 ,treshHold, vitezaIntoarcere);
+
+
+            } else if (colorSensorPrioritar.red() < colorSensorPrioritar.blue()) {
+                calibrareRampa(bilaStanga ,  treshHold, vitezaIntoarcere);
+                servoBile.setPosition(1);
+                TimeUnit.MILLISECONDS.sleep(500);
+                calibrareRampa(5 , treshHold , vitezaIntoarcere);
             }
+
             else {
-                puneServo(1);
+
+                if (colorSensor.red() > bilaRosie) {
+
+                    calibrareRampa(bilaStanga ,  treshHold, vitezaIntoarcere);
+                    servoBile.setPosition(1);
+                    TimeUnit.MILLISECONDS.sleep(500);
+                    calibrareRampa(5 , treshHold , vitezaIntoarcere);
+
+                }
+
+                else if(colorSensor.blue() > bilaAlbastra){
+
+                    calibrareRampa(bilaDreapta, treshHold, vitezaIntoarcere);      // am dat jos bila rosie
+                    puneServo(1);
+                    TimeUnit.MILLISECONDS.sleep(500);
+                    //rotire(0 ,treshHold, vitezaIntoarcere);       // ma pun pe 0 grade
+                    calibrareRampa(0,treshHold,vitezaIntoarcere);
+
+                }
+
+
             }
+            servoBile.setPosition(pozitieServoBileSus);
             oprire();
             TimeUnit.MILLISECONDS.sleep(500);
             // formuleHolonom(navx_device.getYaw(),beta,vitezeHolonom);
@@ -248,11 +284,11 @@ public class AutonomieRosu1 extends LinearOpMode {
             //  mergiDreapta(vitezaMiscare);
             // TimeUnit.MILLISECONDS.sleep(500);
             //du_teLaRaft2(raft,vitezaMiscare-0.01);
-            mergiFata(-0.15,0);
-            TimeUnit.MILLISECONDS.sleep(2000);
+            mergiFata(-0.1,0);
+            TimeUnit.MILLISECONDS.sleep(1900);
             rotire(0,treshHold,vitezaIntoarcere);
             pune_teFataDeRaft(45,'s');
-            du_teLaRaft(raft,vitezaMiscare- 0.015);
+            du_teLaRaft(raft,vitezaMiscare- 0.04);
             // mergiFata(vitezaMiscare);
             //TimeUnit.MILLISECONDS.sleep(300);
             // mergiDreapta(vitezaMiscare);
@@ -462,7 +498,7 @@ public class AutonomieRosu1 extends LinearOpMode {
 
                 raft--;
                 if(raft != 0)
-                    TimeUnit.MILLISECONDS.sleep(1300);
+                    TimeUnit.MILLISECONDS.sleep(2000);
                 telemetry.addData("sunt la raftul:", raft);
                 telemetry.update();
             }
@@ -475,7 +511,7 @@ public class AutonomieRosu1 extends LinearOpMode {
     }
 
     public void oprireTot() {
-
+        hardwareMap.deviceInterfaceModule.get("dim").setDigitalChannelState(LED_CHANNEL, false);
         navx_device.close();
         rangeSensor.close();
         colorSensor.close();

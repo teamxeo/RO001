@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.kauailabs.navx.ftc.AHRS;
 import com.kauailabs.navx.ftc.navXPIDController;
+import com.qualcomm.hardware.adafruit.AdafruitI2cColorSensor;
 import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -56,6 +57,7 @@ public class AutonomieRosu2 extends LinearOpMode {
     private final double YAW_PID_P = 0.005;
     private final double YAW_PID_I = 0.0;
     private final double YAW_PID_D = 0.0;
+    static final int LED_CHANNEL = 5;
     double stanga = -0.6411;
     double dreapta = 0.2988;
     double pozitieServoBileJos = 0.06; // de vazut
@@ -88,12 +90,14 @@ public class AutonomieRosu2 extends LinearOpMode {
     double distRaft1 = 107;
     double distRaft2 = 129;
     double distRaft3 = 148;
+    double bilaAlbastra = 35000;
+    double bilaRosie = 55000;
     public static final String TAG = "Vuforia VuMark Sample";
 
     OpenGLMatrix lastLocation = null;
 
     //Servo servo = hardwareMap.servo.get("servo_jewel");
-    ColorSensor colorSensor;
+    AdafruitI2cColorSensor colorSensor;
 
     VuforiaLocalizer vuforia;
 
@@ -122,7 +126,7 @@ public class AutonomieRosu2 extends LinearOpMode {
         motorFrontLeft = hardwareMap.dcMotor.get("motor front left");
         motorBackLeft = hardwareMap.dcMotor.get("motor back left");
         motorBackRight = hardwareMap.dcMotor.get("motor back right");
-        colorSensor = hardwareMap.colorSensor.get("color_sensor");
+        colorSensor = (AdafruitI2cColorSensor) hardwareMap.get("color_sensor");
         servoBile = hardwareMap.servo.get("servo bile");
         CubSJ = hardwareMap.servo.get("servo rid s 0");
         CubDJ = hardwareMap.servo.get("servo rid d 0");
@@ -222,24 +226,24 @@ public class AutonomieRosu2 extends LinearOpMode {
             telemetry.update();
 
 
-            if (colorSensor.blue() > colorSensor.red()) {
+            if (colorSensor.blue() > bilaAlbastra) {
 
-                calibrareRampa(bilaDreapta, treshHold, vitezaIntoarcere);
+                calibrareRampa(bilaDreapta ,  treshHold, vitezaIntoarcere);
                 servoBile.setPosition(1);
                 TimeUnit.MILLISECONDS.sleep(500);
-                calibrareRampa(5, treshHold, vitezaIntoarcere);
+                calibrareRampa(5 , treshHold , vitezaIntoarcere);
 
                 // rotire(0 ,treshHold, vitezaIntoarcere);
 
 
-            } else if (colorSensor.red() > colorSensor.blue()) {
-
+            } else if (colorSensor.red() > bilaRosie) {
                 calibrareRampa(bilaStanga, treshHold, vitezaIntoarcere);      // am dat jos bila rosie
                 puneServo(1);
                 TimeUnit.MILLISECONDS.sleep(500);
                 //rotire(0 ,treshHold, vitezaIntoarcere);       // ma pun pe 0 grade
-                calibrareRampa(0, treshHold, vitezaIntoarcere);
-            } else {
+                calibrareRampa(0,treshHold,vitezaIntoarcere);
+            }
+            else {
                 puneServo(1);
             }
             oprire();
@@ -639,6 +643,7 @@ public class AutonomieRosu2 extends LinearOpMode {
         navx_device.close();
         rangeSensor.close();
         colorSensor.close();
+        hardwareMap.deviceInterfaceModule.get("dim").setDigitalChannelState(LED_CHANNEL, false);
         oprire();
 
     }
@@ -743,6 +748,11 @@ public class AutonomieRosu2 extends LinearOpMode {
         CubSJ.setPosition(ServS);
         CubDJ.setPosition(ServD);
     }
+
+
+
+
+
 
     public void pune_teFataDeRaft(double tinta, char directie) throws InterruptedException {
         if (rangeSensor.getDistance(DistanceUnit.CM) > tinta) {

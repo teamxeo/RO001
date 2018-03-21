@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.kauailabs.navx.ftc.AHRS;
+import com.qualcomm.hardware.adafruit.AdafruitI2cColorSensor;
 import com.kauailabs.navx.ftc.navXPIDController;
 import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
@@ -88,12 +89,15 @@ public class AutonomieAlbastru1 extends LinearOpMode {
     double distRaft1 = 107;
     double distRaft2 = 129;
     double distRaft3 = 148;
+    double bilaAlbastra = 160;
+    static final int LED_CHANNEL = 5;
+    double bilaRosie = 200;
     public static final String TAG = "Vuforia VuMark Sample";
 
     OpenGLMatrix lastLocation = null;
 
     //Servo servo = hardwareMap.servo.get("servo_jewel");
-    ColorSensor colorSensor;
+    AdafruitI2cColorSensor colorSensor;
 
     VuforiaLocalizer vuforia;
 
@@ -121,7 +125,7 @@ public class AutonomieAlbastru1 extends LinearOpMode {
         motorFrontLeft = hardwareMap.dcMotor.get("motor front left");
         motorBackLeft = hardwareMap.dcMotor.get("motor back left");
         motorBackRight = hardwareMap.dcMotor.get("motor back right");
-        colorSensor = hardwareMap.colorSensor.get("color_sensor");
+        colorSensor = (AdafruitI2cColorSensor) hardwareMap.get("color_sensor");
         servoBile = hardwareMap.servo.get("servo bile");
         CubSJ = hardwareMap.servo.get("servo rid s 0");
         CubDJ = hardwareMap.servo.get("servo rid d 0");
@@ -189,7 +193,7 @@ public class AutonomieAlbastru1 extends LinearOpMode {
                     raft = 3;
                     break;
                 default:
-                    raft = 3;
+                    raft = 2;
                     break;
 
 
@@ -224,17 +228,17 @@ public class AutonomieAlbastru1 extends LinearOpMode {
             telemetry.update();
 
 
-            if (colorSensor.blue() < colorSensor.red()) {
+            if (colorSensor.blue() > bilaAlbastra) {
 
                 calibrareRampa(bilaDreapta ,  treshHold, vitezaIntoarcere);
                 servoBile.setPosition(1);
-                TimeUnit.MILLISECONDS.sleep(500);
+                TimeUnit.MILLISECONDS.sleep(500 );
                 calibrareRampa(5 , treshHold , vitezaIntoarcere);
 
                // rotire(0 ,treshHold, vitezaIntoarcere);
 
 
-            } else if (colorSensor.red() < colorSensor.blue()) {
+            } else if (colorSensor.red() > bilaRosie) {
 
                 calibrareRampa(bilaStanga, treshHold, vitezaIntoarcere);      // am dat jos bila rosie
                 puneServo(1);
@@ -478,6 +482,8 @@ public class AutonomieAlbastru1 extends LinearOpMode {
 
     public void oprireTot() {
 
+
+        hardwareMap.deviceInterfaceModule.get("dim").setDigitalChannelState(LED_CHANNEL, false);
         navx_device.close();
         rangeSensor.close();
         colorSensor.close();
@@ -585,5 +591,7 @@ public class AutonomieAlbastru1 extends LinearOpMode {
         CubSJ.setPosition(ServS);
         CubDJ.setPosition(ServD);
     }
+
+
 
 }

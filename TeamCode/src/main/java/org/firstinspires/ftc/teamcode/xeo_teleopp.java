@@ -2,6 +2,10 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import android.app.Activity;
+import android.graphics.Color;
+import android.view.View;
+
 import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -16,12 +20,12 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-
+import com.qualcomm.hardware.adafruit.AdafruitI2cColorSensor;
 
 
 @TeleOp(name = "Xeo17-18: Tele-OP", group = "Xeo17-18")
 //@Disabled
-public class XeoTeleOP extends OpMode {
+public class xeo_teleopp extends OpMode {
 
     // declarare variabile
     DcMotor motorFrontRight;
@@ -37,14 +41,15 @@ public class XeoTeleOP extends OpMode {
     Servo   relicPrindere;
     Servo   relicRidicare;
     //IntegratingGyroscope gyro;
-   // NavxMicroNavigationSensor navxMicro;
-    //Servo   servoBile;
+    // NavxMicroNavigationSensor navxMicro;
+    Servo   servoBile;
 
     private double servoPoz = 0.68;
-    private double servoPozS = 0.26;
-    private double servoPozD = 0.67;
+    private double servoPozS = 0.32;
+    private double servoPozD = 0.62;
     private double motorPower = 0.3;
     private double relicMotorPower = 1;
+    double standard  = 0.3;
     double timp;
     private int profil;
     private double relicPoz = 1;
@@ -56,8 +61,18 @@ public class XeoTeleOP extends OpMode {
     boolean apasat = false;
     double pozDeschidere = 0.6792;
     double pozInchidere = 0.5926;
-    double defaultt = motorPower;
-   // public ModernRoboticsI2cRangeSensor rangeSensor;
+    double pozitieRelicRidicare = 0;
+    double pozitieRelicPrindere = 0;
+    double relicSus = 0.8;
+    double relicJos = 0.10;
+    double relicPrins = 0.95;
+    double relicDeschis = 0;
+    double timp1 = 0,timp2 = 0;
+    double pozIncheietura = 0;
+    boolean inAer = false;
+    static final int LED_CHANNEL = 5;
+    AdafruitI2cColorSensor colorSensor;
+    // public ModernRoboticsI2cRangeSensor rangeSensor;
     // A timer helps provide feedback while calibration is taking place
     ElapsedTime timer = new ElapsedTime();
 
@@ -65,9 +80,6 @@ public class XeoTeleOP extends OpMode {
     /**
      * Constructor
      */
-    public XeoTeleOP() {
-
-    }
 
 
     @Override
@@ -78,7 +90,7 @@ public class XeoTeleOP extends OpMode {
 		 * that the names of the devices must match the names used when you
 		 * configured your robot and created the configuration file.
 		 */
-
+        colorSensor = (AdafruitI2cColorSensor) hardwareMap.get("color_sensor");
         motorFrontRight = hardwareMap.dcMotor.get("motor front right");
         motorFrontLeft = hardwareMap.dcMotor.get("motor front left");
         motorBackLeft = hardwareMap.dcMotor.get("motor back left");
@@ -95,30 +107,31 @@ public class XeoTeleOP extends OpMode {
         servoRidS_1 = hardwareMap.servo.get("servo rid s 1");
         servoRidD_1 = hardwareMap.servo.get("servo rid d 1");
         motorRidicare = hardwareMap.dcMotor.get("motor rid");
-        servoRidD_0.setPosition(servoPozD);
+        /*servoRidD_0.setPosition(servoPozD);
         servoRidS_0.setPosition(servoPozS);
         servoRidD_1.setPosition(servoPozD);
-        servoRidS_1.setPosition(servoPozS);
-       // relicPrindere=hardwareMap.servo.get("servo relic prindere");
-       // relicRidicare=hardwareMap.servo.get("servo relic ridicare");
-       // relicPrindere.setPosition(0);
-       // relicRidicare.setPosition(0);
-      //  navxMicro = hardwareMap.get(NavxMicroNavigationSensor.class, "navx");
-       // gyro = (IntegratingGyroscope)navxMicro;
+        servoRidS_1.setPosition(servoPozS);*/
+        relicPrindere=hardwareMap.servo.get("servo relic prindere");
+        relicRidicare=hardwareMap.servo.get("servo relic ridicare");
+        // relicPrindere.setPosition(0);
+        // relicRidicare.setPosition(0);
+        //  navxMicro = hardwareMap.get(NavxMicroNavigationSensor.class, "navx");
+        // gyro = (IntegratingGyroscope)navxMicro;
         profil=1;
-        //servoBile = hardwareMap.servo.get("servo bile");
-        //servoBile.setPosition(1);
-      //  rangeSensor = (ModernRoboticsI2cRangeSensor) hardwareMap.opticalDistanceSensor.get("sensor_distance");
+        servoBile = hardwareMap.servo.get("servo bile");
+        servoBile.setPosition(1);
+        //  rangeSensor = (ModernRoboticsI2cRangeSensor) hardwareMap.opticalDistanceSensor.get("sensor_distance");
         telemetry.log().add("Gyro Calibrating. Do Not Move!");
 
         //Wait until the gyro calibration is complete
-      //  timer.reset();
-      //  while (navxMicro.isCalibrating())  {
-      //      telemetry.addData("calibrating", "%s", Math.round(timer.seconds())%2==0 ? "|.." : "..|");
-      //      telemetry.update();
-     //   }
-      //  telemetry.log().clear(); telemetry.log().add("Gyro Calibrated. Press Start.");
+        //  timer.reset();
+        //  while (navxMicro.isCalibrating())  {
+        //      telemetry.addData("calibrating", "%s", Math.round(timer.seconds())%2==0 ? "|.." : "..|");
+        //      telemetry.update();
+        //   }
+        //  telemetry.log().clear(); telemetry.log().add("Gyro Calibrated. Press Start.");
         telemetry.clear(); telemetry.update();
+        hardwareMap.deviceInterfaceModule.get("dim").setDigitalChannelState(LED_CHANNEL, false);
 
     }
 
@@ -127,22 +140,22 @@ public class XeoTeleOP extends OpMode {
     @Override
     public void loop() {        //functie loop, se repeta continuu, de la apasarea start pana la apasarea stop
 
-        //servoBile.setPosition(1);
+        servoBile.setPosition(1);
         //telemetry.addData("distanta", rangeSensor.getDistance(DistanceUnit.CM));
-       // telemetry.update();
+        // telemetry.update();
         /** ----------------------------- <miscare> ----------------------------- */
         /* left stick controls direction
            right stick X controls rotation */
 
-       // Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        // Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
 
 
-         //   float unghi = angles.firstAngle;
-          //  float var_1 = (float)Math.cos(unghi);
-          //  float var_2 = (float)Math.sin(unghi);
-            float gamepad1LeftY = -gamepad1.left_stick_y ;
-            float gamepad1LeftX = -gamepad1.left_stick_x ;
-            float gamepad1RightX = gamepad1.right_stick_x;
+        //   float unghi = angles.firstAngle;
+        //  float var_1 = (float)Math.cos(unghi);
+        //  float var_2 = (float)Math.sin(unghi);
+        float gamepad1LeftY = -gamepad1.left_stick_y ;
+        float gamepad1LeftX = -gamepad1.left_stick_x ;
+        float gamepad1RightX = gamepad1.right_stick_x;
 
             /*--> if(gamepad1RightX < -0.1 || gamepad1RightX > 0.1){
                 apasat = true;
@@ -171,137 +184,146 @@ public class XeoTeleOP extends OpMode {
             double BackRight = yDir + xDir - gamepad1RightX;
             double BackLeft = -yDir + xDir - gamepad1RightX; */
 
-            // holonomic formulas
+        // holonomic formulas
 
-            float FrontLeft = -gamepad1LeftY - gamepad1LeftX - gamepad1RightX;
-            float FrontRight = gamepad1LeftY - gamepad1LeftX - gamepad1RightX;
-            float BackRight = gamepad1LeftY + gamepad1LeftX - gamepad1RightX;
-            float BackLeft = -gamepad1LeftY + gamepad1LeftX - gamepad1RightX;
+        float FrontLeft = -gamepad1LeftY - gamepad1LeftX - gamepad1RightX;
+        float FrontRight = gamepad1LeftY - gamepad1LeftX - gamepad1RightX;
+        float BackRight = gamepad1LeftY + gamepad1LeftX - gamepad1RightX;
+        float BackLeft = -gamepad1LeftY + gamepad1LeftX - gamepad1RightX;
 
-            // clip the right/left values so that the values never exceed +/- 1
-            FrontRight = Range.clip(FrontRight, -1, 1);
-            FrontLeft = Range.clip(FrontLeft, -1, 1);
-            BackLeft = Range.clip(BackLeft, -1, 1);
-            BackRight = Range.clip(BackRight, -1, 1);
+        // clip the right/left values so that the values never exceed +/- 1
+        FrontRight = Range.clip(FrontRight, -1, 1);
+        FrontLeft = Range.clip(FrontLeft, -1, 1);
+        BackLeft = Range.clip(BackLeft, -1, 1);
+        BackRight = Range.clip(BackRight, -1, 1);
 
-            // write the values to the motors
-            if (!gamepad1.dpad_up && !gamepad1.dpad_down && !gamepad1.dpad_right && !gamepad1.dpad_left)
-            {
-                motorFrontRight.setPower(FrontRight * motorPower);
-                motorFrontLeft.setPower(FrontLeft * motorPower);
-                motorBackLeft.setPower(BackLeft * motorPower);
-                motorBackRight.setPower(BackRight * motorPower);
-            }
+        // write the values to the motors
+        if (!gamepad1.dpad_up && !gamepad1.dpad_down && !gamepad1.dpad_right && !gamepad1.dpad_left)
+        {
+            motorFrontRight.setPower(FrontRight * motorPower);
+            motorFrontLeft.setPower(FrontLeft * motorPower);
+            motorBackLeft.setPower(BackLeft * motorPower);
+            motorBackRight.setPower(BackRight * motorPower);
+        }
 
 
 
-            //mecanumDrive_Cartesian(gamepad1.left_stick_x,gamepad1.left_stick_y,gamepad1.right_stick_x,angles.firstAngle, motorPower);
-                // bumper dreapta - 0.65
-                //bumper stanga  - 0.15
-                //default  - 0.3
-            //cutie viteze miscare
-            if (gamepad1.y) {
-                defaultt = 0.5;
-            }
-            if (gamepad1.a) {
-                defaultt = 0.15;
-            }
-            if (gamepad1.x) {
-                defaultt = 0.3;
-            }
+        //mecanumDrive_Cartesian(gamepad1.left_stick_x,gamepad1.left_stick_y,gamepad1.right_stick_x,angles.firstAngle, motorPower);
 
-            if(gamepad1.right_trigger !=0)
-                motorPower = 0.65;
-            else
-            if(gamepad1.left_trigger != 0)
-                motorPower = 0.10;
-            else
-            if(gamepad1.right_trigger == 0 && gamepad1.left_trigger == 0)
-                motorPower = defaultt;
+        //cutie viteze miscare
+        if (gamepad1.y) {
+            standard = 0.6;
+        }
+        if (gamepad1.a) {
+            standard = 0.15;
+        }
+        if (gamepad1.x) {
+            standard = 0.3;
+        }
+        if(gamepad1.right_trigger != 0){
+            motorPower  = 0.6;
+        }
+        else
+        if(gamepad1.left_trigger != 0 ){
+            motorPower = 0.15;
+        }
+        else
+            motorPower = standard;
 
         //cod fata spate dreapta stanga
-            if (gamepad1.dpad_up)
-            {
-                motorFrontRight.setPower(motorPower);
-                motorFrontLeft.setPower(-motorPower);
-                motorBackLeft.setPower(-motorPower);
-                motorBackRight.setPower(motorPower);
-            }
-            if (gamepad1.dpad_down)
-            {
-                motorFrontRight.setPower(-motorPower);
-                motorFrontLeft.setPower(motorPower);
-                motorBackLeft.setPower(motorPower);
-                motorBackRight.setPower(-motorPower);
-            }
-            if (gamepad1.dpad_right)
-            {
-                motorFrontRight.setPower(motorPower);
-                motorFrontLeft.setPower(motorPower);
-                motorBackLeft.setPower(-motorPower);
-                motorBackRight.setPower(-motorPower);
-            }
-            if (gamepad1.dpad_left)
-            {
-                motorFrontRight.setPower(-motorPower);
-                motorFrontLeft.setPower(-motorPower);
-                motorBackLeft.setPower(motorPower);
-                motorBackRight.setPower(motorPower);
-            }
+        if (gamepad1.dpad_up)
+        {
+            motorFrontRight.setPower(motorPower);
+            motorFrontLeft.setPower(-motorPower);
+            motorBackLeft.setPower(-motorPower);
+            motorBackRight.setPower(motorPower);
+        }
+        if (gamepad1.dpad_down)
+        {
+            motorFrontRight.setPower(-motorPower);
+            motorFrontLeft.setPower(motorPower);
+            motorBackLeft.setPower(motorPower);
+            motorBackRight.setPower(-motorPower);
+        }
+        if (gamepad1.dpad_right)
+        {
+            motorFrontRight.setPower(motorPower);
+            motorFrontLeft.setPower(motorPower);
+            motorBackLeft.setPower(-motorPower);
+            motorBackRight.setPower(-motorPower);
+        }
+        if (gamepad1.dpad_left)
+        {
+            motorFrontRight.setPower(-motorPower);
+            motorFrontLeft.setPower(-motorPower);
+            motorBackLeft.setPower(motorPower);
+            motorBackRight.setPower(motorPower);
+        }
+
 
         /* ----------------------------- </miscare> ----------------------------- */
 
-            //telemetry.addLine();
-            //telemetry.addData("Servo Bile:", servoBile);
+        //telemetry.addLine();
+        //telemetry.addData("Servo Bile:", servoBile);
 
         /** ---------------------------- <profiluri> ----------------------------  */
-        if (gamepad2.y)
-        {
-            profil=1;
+        if (gamepad2.y) {
+            if (timp2 - timp1 >= 500 || timp1 == 0) {
+                if (profil == 1)
+                    profil = 2;
+                else
+                    profil = 1;
+                timp1= System.currentTimeMillis();
+            }
         }
-      //  if (gamepad2.a)
-       // {
-      //      profil=2;
-      //  }
+            if(timp1 != 0)
+                timp2= System.currentTimeMillis();
+        //  if (gamepad2.a)
+        // {
+        //      profil=2;
+        //  }
+
         /* ---------------------------- </profiluri> ----------------------------  */
         /** ----------------------------- <prindere> ----------------------------- */
+        if (profil==1) {
+            servoRidD_0.setPosition(servoPozD);
+            servoRidS_0.setPosition(servoPozS);
+            servoRidD_1.setPosition(servoPozD);
+            servoRidS_1.setPosition(servoPozS);
+            relicPrindere.setPosition(0);
+            relicRidicare.setPosition(0);
 
-                servoRidD_0.setPosition(servoPozD);
-                servoRidS_0.setPosition(servoPozS);
-                servoRidD_1.setPosition(servoPozD);
-                servoRidS_1.setPosition(servoPozS);
+            if (gamepad2.a) { // inchidere
+                servoPozS = 0.26;
+                servoPozD = 0.67;
+            }
+            if (gamepad2.b) { // deschidere
+                servoPozS = 0.4614;
+                servoPozD = 0.4785;
+            }
+            if (gamepad2.x) // deschis si mai tare
+            {
+                servoPozS = 0.75;
+                servoPozD = 0.25;
+            }
 
 
-        if(gamepad2.a) { // inchidere
-            servoPozS = 0.28;
-            servoPozD = 0.65;
-        }
-        if(gamepad2.b) { // deschidere
-            servoPozS = 0.4614;
-            servoPozD = 0.4785;
-        }
-        if(gamepad2.x) // deschis si mai tare
-        {
-            servoPozS= 0.75;
-            servoPozD= 0.25;
-        }
-        if (profil==1)
-        {
             if (gamepad2.left_trigger != 0 && servoPozD > 0.4 && servoPozS < 0.5) {
                 servoPozS += gamepad2.left_trigger / 25;
                 servoPozD -= gamepad2.left_trigger / 25;
             }
-            if(gamepad2.right_trigger != 0  && servoPozS > 0.25 && servoPozD < 0.7 ){
+            if (gamepad2.right_trigger != 0 && servoPozS > 0.25 && servoPozD < 0.7) {
                 servoPozS -= gamepad2.right_trigger / 25;
                 servoPozD += gamepad2.right_trigger / 25;
             }
 
-        }
 
+
+        }
 
          /* ----------------------------- </prindere> ----------------------------- */
 
-         /** ---------------------------- <ridicare> ----------------------------- */
+        /** ---------------------------- <ridicare> ----------------------------- */
         if (profil==1)
         {
             if (gamepad2.dpad_up)
@@ -326,46 +348,46 @@ public class XeoTeleOP extends OpMode {
         if (profil==2)
         {
 
-            relicPrindere.setPosition(relicPoz);
-            relicRidicare.setPosition(ridicarePoz);
 
+            //dpad up ridici relic
+            //dpad down lasi relic
+            //x inchizi servo
+            //b deschizi servo
+            //trigger intinzi bratu
 
-
-            if(gamepad2.x)
-                relicMotorPower = 0.5;
-            if(gamepad2.b)
-                relicMotorPower = 0.7;
-
-
-
+            if (pozIncheietura > relicJos + 0.1)
+                inAer = true;
+            else
+                inAer = false;
+            double treapta = 0.03;
+            //// incheietura
+            relicRidicare.setPosition(pozIncheietura);
             if(gamepad2.dpad_up)
-                motorRelic.setPower(relicMotorPower);
-              else
-                if(gamepad2.dpad_down)
-                    motorRelic.setPower(-relicMotorPower);
-                       else
-                    motorRelic.setPower(0);
+                pozIncheietura = relicSus;
+            if(gamepad2.dpad_down)
+                pozIncheietura = relicJos;
+            if(gamepad2.left_stick_y < 0.1 || gamepad2.left_stick_y > 0.1)
+                pozIncheietura -= gamepad2.left_stick_y / 50;
+            ////grip
+            if(gamepad2.x)
+                relicPrindere.setPosition(relicPrins);
+            if(gamepad2.b && !inAer)
+                relicPrindere.setPosition(relicDeschis);
+            ////motor
+            if(gamepad2.right_bumper)
+                motorRelic.setPower(-0.5);
+            else
+            if(gamepad2.left_bumper)
+                motorRelic.setPower(0.5);
+            else
+                motorRelic.setPower(0);
 
+            telemetry.addData("pozitieRelicPrindere", pozitieRelicPrindere);
+            telemetry.addData("pozitieRelicRidicare",pozitieRelicRidicare);
+            telemetry.update();
 
-
-            if (gamepad2.dpad_left  && relicPrindere.getPosition() < 1)
-                relicPoz += 0.01;
-            else if (gamepad2.dpad_right && relicPrindere.getPosition() > 0)
-                relicPoz -= 0.01;
-
-            if (gamepad2.left_bumper && relicRidicare.getPosition() < 1)
-                ridicarePoz += 0.01;
-            else if (gamepad2.right_bumper && relicRidicare.getPosition() > 0)
-                ridicarePoz -= 0.01;
-            telemetry.addData("gheara: ", relicPrindere.getPosition());
-            telemetry.addData("relic: ", relicRidicare.getPosition());
         }
-
-        telemetry.addData("Joystick X: ", gamepad1LeftX);
-        telemetry.addData("Joystick Y: ", gamepad1LeftY);
-        telemetry.addData("Alfa: ", alpha);
-        telemetry.addData("Beta: ", beta);
-       // telemetry.addData("Rotatie: ", angles.firstAngle);
+        // telemetry.addData("Rotatie: ", angles.firstAngle);
         /* ---------------------------- </relic> ----------------------------- */
     }
 
@@ -382,13 +404,13 @@ public class XeoTeleOP extends OpMode {
 
     public void oprireServo() {
 
-        //servoBile.close();
+        servoBile.close();
         servoRidD_0.close();
         servoRidS_0.close();
         servoRidD_1.close();
         servoRidS_1.close();
-      //  relicPrindere.close();
-      //  relicRidicare.close();
+        relicPrindere.close();
+        relicRidicare.close();
 
     }
 
@@ -399,7 +421,34 @@ public class XeoTeleOP extends OpMode {
         motorFrontRight.close();
         motorFrontLeft.close();
         motorRidicare.close();
-       // motorRelic.close();
+        motorRelic.close();
+
+    }
+
+    public void miscareTreptata(Servo servo, double target, double treapta) throws InterruptedException {
+
+        boolean sus = servo.getPosition() > target ? false : true;
+
+        if (sus) {
+
+            while (servo.getPosition() >= target) {
+
+                servo.setPosition(servo.getPosition() + treapta);
+                Thread.sleep(50);
+
+            }
+
+        }
+
+        else {
+
+            while (servo.getPosition() <= target) {
+
+                servo.setPosition(servo.getPosition() - treapta);
+                Thread.sleep(50);
+            }
+
+        }
 
     }
 
@@ -409,7 +458,7 @@ public class XeoTeleOP extends OpMode {
      * scaled value is less than linear.  This is to make it easier to drive
      * the robot more precisely at slower speeds.
      */
-        double scaleInput (double dVal){
+    double scaleInput (double dVal){
         double[] scaleArray = {0.0, 0.05, 0.09, 0.10, 0.12, 0.15, 0.18, 0.24,
                 0.30, 0.36, 0.43, 0.50, 0.60, 0.72, 0.85, 1.00, 1.00};
 
@@ -463,15 +512,15 @@ public class XeoTeleOP extends OpMode {
         motorBackRight.setPower(wheelSpeeds[3] * speed);
     }
 
-        String formatRate ( float rate){
+    String formatRate ( float rate){
         return String.format("%.3f", rate);
     }
 
-        String formatDegrees ( double degrees){
+    String formatDegrees ( double degrees){
         return String.format("%.1f", AngleUnit.DEGREES.normalize(degrees));
     }
 
-        String formatAngle (AngleUnit angleUnit,double angle){
+    String formatAngle (AngleUnit angleUnit,double angle){
         return formatDegrees(AngleUnit.DEGREES.fromUnit(angleUnit, angle));
     }
 
@@ -487,7 +536,7 @@ public class XeoTeleOP extends OpMode {
     /**
      * Normalize all wheel speeds if the magnitude of any wheel is greater than 1.0.
      */
-     void normalize(double[] wheelSpeeds) {
+    void normalize(double[] wheelSpeeds) {
         double maxMagnitude = Math.abs(wheelSpeeds[0]);
         for (int i = 1; i < kMaxNumberOfMotors; i++) {
             double temp = Math.abs(wheelSpeeds[i]);
@@ -503,5 +552,4 @@ public class XeoTeleOP extends OpMode {
     }
 
 
-    }
-
+}
