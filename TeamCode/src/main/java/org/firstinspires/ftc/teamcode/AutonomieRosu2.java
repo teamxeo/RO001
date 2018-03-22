@@ -90,15 +90,15 @@ public class AutonomieRosu2 extends LinearOpMode {
     double distRaft1 = 107;
     double distRaft2 = 129;
     double distRaft3 = 148;
-    double bilaAlbastra = 35000;
-    double bilaRosie = 55000;
+    double bilaAlbastra = 150;
+    double bilaRosie = 200;
     public static final String TAG = "Vuforia VuMark Sample";
 
     OpenGLMatrix lastLocation = null;
 
     //Servo servo = hardwareMap.servo.get("servo_jewel");
     AdafruitI2cColorSensor colorSensor;
-
+    ColorSensor colorSensorPrioritar;
     VuforiaLocalizer vuforia;
 
     @Override
@@ -127,6 +127,7 @@ public class AutonomieRosu2 extends LinearOpMode {
         motorBackLeft = hardwareMap.dcMotor.get("motor back left");
         motorBackRight = hardwareMap.dcMotor.get("motor back right");
         colorSensor = (AdafruitI2cColorSensor) hardwareMap.get("color_sensor");
+        colorSensorPrioritar = hardwareMap.colorSensor.get("color_sensor_2");
         servoBile = hardwareMap.servo.get("servo bile");
         CubSJ = hardwareMap.servo.get("servo rid s 0");
         CubDJ = hardwareMap.servo.get("servo rid d 0");
@@ -226,26 +227,49 @@ public class AutonomieRosu2 extends LinearOpMode {
             telemetry.update();
 
 
-            if (colorSensor.blue() > bilaAlbastra) {
-
-                calibrareRampa(bilaDreapta ,  treshHold, vitezaIntoarcere);
-                servoBile.setPosition(1);
-                TimeUnit.MILLISECONDS.sleep(500);
-                calibrareRampa(5 , treshHold , vitezaIntoarcere);
-
-                // rotire(0 ,treshHold, vitezaIntoarcere);
-
-
-            } else if (colorSensor.red() > bilaRosie) {
-                calibrareRampa(bilaStanga, treshHold, vitezaIntoarcere);      // am dat jos bila rosie
+            if (colorSensorPrioritar.red() > colorSensorPrioritar.blue()) {
+                calibrareRampa(bilaDreapta, treshHold, vitezaIntoarcere);      // am dat jos bila rosie
                 puneServo(1);
                 TimeUnit.MILLISECONDS.sleep(500);
                 //rotire(0 ,treshHold, vitezaIntoarcere);       // ma pun pe 0 grade
                 calibrareRampa(0,treshHold,vitezaIntoarcere);
+
+
+
+                // rotire(0 ,treshHold, vitezaIntoarcere);
+
+
+            } else if (colorSensorPrioritar.red() < colorSensorPrioritar.blue()) {
+                calibrareRampa(bilaStanga ,  treshHold, vitezaIntoarcere);
+                servoBile.setPosition(1);
+                TimeUnit.MILLISECONDS.sleep(500);
+                calibrareRampa(5 , treshHold , vitezaIntoarcere);
             }
+
             else {
-                puneServo(1);
+
+                if (colorSensor.red() > bilaRosie) {
+
+                    calibrareRampa(bilaStanga ,  treshHold, vitezaIntoarcere);
+                    servoBile.setPosition(1);
+                    TimeUnit.MILLISECONDS.sleep(500);
+                    calibrareRampa(5 , treshHold , vitezaIntoarcere);
+
+                }
+
+                else if(colorSensor.blue() > bilaAlbastra){
+
+                    calibrareRampa(bilaDreapta, treshHold, vitezaIntoarcere);      // am dat jos bila rosie
+                    puneServo(1);
+                    TimeUnit.MILLISECONDS.sleep(500);
+                    //rotire(0 ,treshHold, vitezaIntoarcere);       // ma pun pe 0 grade
+                    calibrareRampa(0,treshHold,vitezaIntoarcere);
+
+                }
+
+
             }
+            servoBile.setPosition(pozitieServoBileSus);
             oprire();
             TimeUnit.MILLISECONDS.sleep(500);
             // formuleHolonom(navx_device.getYaw(),beta,vitezeHolonom);

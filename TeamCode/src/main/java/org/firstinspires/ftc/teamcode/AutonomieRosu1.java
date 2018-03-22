@@ -59,15 +59,15 @@ public class AutonomieRosu1 extends LinearOpMode {
     private final double YAW_PID_D = 0.0;
     double stanga = -0.6411;
     double dreapta = 0.2988;
-    double pozitieServoBileJos = 0.06; // de vazut
+    double pozitieServoBileJos = 0.07; // de vazut
     double pozitieServoBileSus = 1;
     int rotireDreapta = 1;
     int rotireStanga = -1;
-    double vitezaIntoarcere = 0.07;
+    double vitezaIntoarcere = 0.05;
     double bilaStanga = - 10;
     double bilaDreapta = 10;
     double treshHold = 2;
-    double vitezaMiscare = 0.1;
+    double vitezaMiscare = 0.15;
     int raft = 0;
     Servo servoBile;
     Servo CubSJ;
@@ -195,7 +195,7 @@ public class AutonomieRosu1 extends LinearOpMode {
                     raft = 3;
                     break;
                 default:
-                    raft = 1;
+                    raft = 2;
                     break;
 
 
@@ -203,9 +203,12 @@ public class AutonomieRosu1 extends LinearOpMode {
 
             telemetry.addData("Rotatie: ", navx_device.getYaw());
             telemetry.addLine();
-            telemetry.addData("Albastru: ", colorSensor.blue());
+            telemetry.addData("Albastru 1: ", colorSensorPrioritar.blue());
             telemetry.addLine();
-            telemetry.addData("Rosu: ", colorSensor.red());
+            telemetry.addData("Rosu1: ", colorSensorPrioritar.red());
+            telemetry.addData("Albastru 2: ", colorSensor.blue());
+            telemetry.addLine();
+            telemetry.addData("Rosu2: ", colorSensor.red());
             telemetry.addLine();
             telemetry.addData("distanta initiala:", rangeSensor.getDistance(DistanceUnit.CM));
             //telemetry.addData("Altitudine: ", navx_device.getAltitude());
@@ -231,7 +234,7 @@ public class AutonomieRosu1 extends LinearOpMode {
 
 
             if (colorSensorPrioritar.red() > colorSensorPrioritar.blue()) {
-                calibrareRampa(bilaDreapta, treshHold, vitezaIntoarcere);      // am dat jos bila rosie
+                calibrareRampa(bilaDreapta, treshHold, vitezaIntoarcere + 0.015);      // am dat jos bila rosie
                 puneServo(1);
                 TimeUnit.MILLISECONDS.sleep(500);
                 //rotire(0 ,treshHold, vitezaIntoarcere);       // ma pun pe 0 grade
@@ -243,7 +246,7 @@ public class AutonomieRosu1 extends LinearOpMode {
 
 
             } else if (colorSensorPrioritar.red() < colorSensorPrioritar.blue()) {
-                calibrareRampa(bilaStanga ,  treshHold, vitezaIntoarcere);
+                calibrareRampa(bilaStanga ,  treshHold, vitezaIntoarcere+ 0.015);
                 servoBile.setPosition(1);
                 TimeUnit.MILLISECONDS.sleep(500);
                 calibrareRampa(5 , treshHold , vitezaIntoarcere);
@@ -253,7 +256,7 @@ public class AutonomieRosu1 extends LinearOpMode {
 
                 if (colorSensor.red() > bilaRosie) {
 
-                    calibrareRampa(bilaStanga ,  treshHold, vitezaIntoarcere);
+                    calibrareRampa(bilaStanga ,  treshHold, vitezaIntoarcere+ 0.015);
                     servoBile.setPosition(1);
                     TimeUnit.MILLISECONDS.sleep(500);
                     calibrareRampa(5 , treshHold , vitezaIntoarcere);
@@ -262,7 +265,7 @@ public class AutonomieRosu1 extends LinearOpMode {
 
                 else if(colorSensor.blue() > bilaAlbastra){
 
-                    calibrareRampa(bilaDreapta, treshHold, vitezaIntoarcere);      // am dat jos bila rosie
+                    calibrareRampa(bilaDreapta, treshHold, vitezaIntoarcere+ 0.015);      // am dat jos bila rosie
                     puneServo(1);
                     TimeUnit.MILLISECONDS.sleep(500);
                     //rotire(0 ,treshHold, vitezaIntoarcere);       // ma pun pe 0 grade
@@ -284,11 +287,11 @@ public class AutonomieRosu1 extends LinearOpMode {
             //  mergiDreapta(vitezaMiscare);
             // TimeUnit.MILLISECONDS.sleep(500);
             //du_teLaRaft2(raft,vitezaMiscare-0.01);
-            mergiFata(-0.1,0);
-            TimeUnit.MILLISECONDS.sleep(1900);
+            mergiFata(-0.23,0);
+            TimeUnit.MILLISECONDS.sleep(1500);
             rotire(0,treshHold,vitezaIntoarcere);
-            pune_teFataDeRaft(45,'s');
-            du_teLaRaft(raft,vitezaMiscare- 0.04);
+            pune_teFataDeRaft(35,'s');
+            du_teLaRaft(raft,vitezaMiscare-0.05);
             // mergiFata(vitezaMiscare);
             //TimeUnit.MILLISECONDS.sleep(300);
             // mergiDreapta(vitezaMiscare);
@@ -302,18 +305,18 @@ public class AutonomieRosu1 extends LinearOpMode {
             //    TimeUnit.MILLISECONDS.sleep(550);
             // }
             mergiFata(vitezaMiscare, 0);
-            TimeUnit.MILLISECONDS.sleep(2000);
+            TimeUnit.MILLISECONDS.sleep(1500);
             oprire();
             lasaCub(ServSLas,ServDLas);
-            TimeUnit.MILLISECONDS.sleep(500);
+            TimeUnit.MILLISECONDS.sleep(300);
             mergiFata(-vitezaMiscare, 0);
-            TimeUnit.MILLISECONDS.sleep(1000);
+            TimeUnit.MILLISECONDS.sleep(500);
             mRid.setPower(-1);
             TimeUnit.MILLISECONDS.sleep(500);
             mRid.setPower(0);
             inchideServo();
             mergiFata(vitezaMiscare, 0);
-            TimeUnit.MILLISECONDS.sleep(2000);
+            TimeUnit.MILLISECONDS.sleep(1200);
             mergiFata(-vitezaMiscare, 0);
             TimeUnit.MILLISECONDS.sleep(500);
             oprire();
@@ -498,7 +501,7 @@ public class AutonomieRosu1 extends LinearOpMode {
 
                 raft--;
                 if(raft != 0)
-                    TimeUnit.MILLISECONDS.sleep(2000);
+                    TimeUnit.MILLISECONDS.sleep(1000);
                 telemetry.addData("sunt la raftul:", raft);
                 telemetry.update();
             }
@@ -624,11 +627,17 @@ public class AutonomieRosu1 extends LinearOpMode {
     }
 
     public void pune_teFataDeRaft(double tinta, char directie) throws InterruptedException{
+        if(rangeSensor.getDistance(DistanceUnit.CM) > tinta)
         while(rangeSensor.getDistance(DistanceUnit.CM) > tinta){
             if(directie == 's')
                 mergiDreapta(-vitezaMiscare);
             if(directie == 'd')
                 mergiDreapta(vitezaMiscare);
+        }
+        else{
+            while(rangeSensor.getDistance(DistanceUnit.CM) < tinta){
+                mergiDreapta(vitezaMiscare - 0.015);
+            }
         }
         oprire();
 
