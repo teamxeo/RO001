@@ -29,11 +29,11 @@ import static java.lang.System.currentTimeMillis;
 import static java.lang.System.in;
 
 /**
- * Created by (for example John) on 2/14/2018.
+ * Created by  Mmz on 2/14/2018.
  */
 
-@Autonomous(name = "AutonomieAlbastru2", group = "AutonomieAlbastru2")
-public class AutonomieAlbastru2 extends LinearOpMode {
+@Autonomous(name = "AutonomieAlbastru2_Alfa", group = "AutonomieAlbastru2_Alfa")
+public class AutonomieAlbastru2_Alfa extends LinearOpMode {
 
     public ModernRoboticsI2cRangeSensor rangeSensor;
     private final int NAVX_DIM_I2C_PORT = 0;
@@ -50,19 +50,8 @@ public class AutonomieAlbastru2 extends LinearOpMode {
 
     DcMotor mRid;
 
-    private final double TARGET_ANGLE_DEGREES = 90.0;
-    private final double TOLERANCE_DEGREES = 2.0;
-    private final double MIN_MOTOR_OUTPUT_VALUE = -1.0;
-    private final double MAX_MOTOR_OUTPUT_VALUE = 1.0;
-    private final double YAW_PID_P = 0.005;
-    private final double YAW_PID_I = 0.0;
-    private final double YAW_PID_D = 0.0;
-    double stanga = -0.6411;
-    double dreapta = 0.2988;
     double pozitieServoBileJos = 0.06; // de vazut
     double pozitieServoBileSus = 1;
-    int rotireDreapta = 1;
-    int rotireStanga = -1;
     double vitezaIntoarcere = 0.07;
     double bilaStanga = - 10;
     double bilaDreapta = 10;
@@ -70,13 +59,17 @@ public class AutonomieAlbastru2 extends LinearOpMode {
     double vitezaMiscare = 0.1;
     int raft = 0;
     Servo servoBile;
+    Servo servoBileSD;
     Servo CubSJ;
     Servo CubDJ;
     Servo CubSS;
     Servo CubDS;
+
     double rollInitial;
     double altInitial;
-    double vitezeHolonom[] = new double[4];
+
+    double VitezaIntoarcereMare = 0.23;
+
     double alpha;
     double beta = 0;
     double zeroRoll = 0;
@@ -86,9 +79,9 @@ public class AutonomieAlbastru2 extends LinearOpMode {
     double ServSLas = 0.4614;
     double ServDLas = 0.4785;
     boolean terminat ;
-    double distRaft1 = 107;
-    double distRaft2 = 129;
-    double distRaft3 = 148;
+    double distRaft1 = 47;
+    double distRaft2 = 65;
+    double distRaft3 = 83;
     double bilaAlbastra = 35000;
     double bilaRosie = 55000;
     static final int LED_CHANNEL = 5;
@@ -97,13 +90,14 @@ public class AutonomieAlbastru2 extends LinearOpMode {
     OpenGLMatrix lastLocation = null;
 
     //Servo servo = hardwareMap.servo.get("servo_jewel");
-    AdafruitI2cColorSensor colorSensor;
+    AdafruitI2cColorSensor colorSensor;g
     ColorSensor colorSensorPrioritar;
 
     VuforiaLocalizer vuforia;
 
     @Override
     public void runOpMode() throws InterruptedException {
+
         terminat = false;
         navx_device = AHRS.getInstance(hardwareMap.deviceInterfaceModule.get("dim"),
                 NAVX_DIM_I2C_PORT,
@@ -128,7 +122,10 @@ public class AutonomieAlbastru2 extends LinearOpMode {
         motorBackRight = hardwareMap.dcMotor.get("motor back right");
         colorSensor = (AdafruitI2cColorSensor) hardwareMap.get("color_sensor");
         colorSensorPrioritar = hardwareMap.colorSensor.get("color_sensor_2");
+
         servoBile = hardwareMap.servo.get("servo bile");
+        servoBileSD=hardwareMap.servo.get("servo bile SD");
+
         CubSJ = hardwareMap.servo.get("servo rid s 0");
         CubDJ = hardwareMap.servo.get("servo rid d 0");
         CubSS = hardwareMap.servo.get("servo rid s 1");
@@ -136,18 +133,7 @@ public class AutonomieAlbastru2 extends LinearOpMode {
         mRid = hardwareMap.dcMotor.get("motor rid");
         rangeSensor = (ModernRoboticsI2cRangeSensor) hardwareMap.opticalDistanceSensor.get("sensor_distance");
 
-        /*CubSJ.setPosition(ServS);
-        CubDJ.setPosition(ServD);
-        CubSS.setPosition(ServS);
-        CubDS.setPosition(ServD);*/
-
-        /*while (colorSensor.blue()==colorSensor.red() && position>0)
-        {
-
-            servoBile.setPosition(position);
-            position += 0.01;
-
-        }*/
+        servoBileSD.setPosition(0.5);
 
         while (!calibration_complete && !Thread.currentThread().isInterrupted()) {
             /* navX-Micro Calibration completes automatically ~15 seconds after it is
@@ -164,8 +150,6 @@ public class AutonomieAlbastru2 extends LinearOpMode {
                 telemetry.addData("navX-Micro", "M-am calibrat");
             telemetry.update();
         }
-
-
 
 
         rollInitial = navx_device.getPitch();
@@ -224,68 +208,74 @@ public class AutonomieAlbastru2 extends LinearOpMode {
 
             zeroRoll = navx_device.getPitch();
             prindeCub(ServS,ServD);
-            servoBile.setPosition(pozitieServoBileJos);///NICE
+
+            servoBile.setPosition(pozitieServoBileJos);
+
             TimeUnit.MILLISECONDS.sleep(1000);
             telemetry.addData("Rotatie: ", navx_device.getYaw());
             telemetry.update();
 
 
             if (colorSensorPrioritar.red() > colorSensorPrioritar.blue()) {
-                calibrareRampa(bilaStanga, treshHold, vitezaIntoarcere);      // am dat jos bila rosie
-                puneServo(1);
-                TimeUnit.MILLISECONDS.sleep(500);
-                //rotire(0 ,treshHold, vitezaIntoarcere);       // ma pun pe 0 grade
-                calibrareRampa(0,treshHold,vitezaIntoarcere);
-
-
-
-
-
-
-            } else if (colorSensorPrioritar.red() < colorSensorPrioritar.blue()) {
-                calibrareRampa(bilaDreapta ,  treshHold, vitezaIntoarcere);
+                josBila(true);      // am dat jos bila rosie
                 servoBile.setPosition(1);
                 TimeUnit.MILLISECONDS.sleep(500);
-                calibrareRampa(5 , treshHold , vitezaIntoarcere);
+
+            } else if (colorSensorPrioritar.red() < colorSensorPrioritar.blue()) {
+                josBila(false);
+                servoBile.setPosition(1);
+                TimeUnit.MILLISECONDS.sleep(500);
             }
 
             else {
 
                 if (colorSensor.red() > bilaRosie) {
 
-                    calibrareRampa(bilaDreapta ,  treshHold, vitezaIntoarcere);
+                    josBila(false);
                     servoBile.setPosition(1);
                     TimeUnit.MILLISECONDS.sleep(500);
-                    calibrareRampa(5 , treshHold , vitezaIntoarcere);
 
                 }
 
                 else if(colorSensor.blue() > bilaAlbastra){
 
-                    calibrareRampa(bilaStanga, treshHold, vitezaIntoarcere);      // am dat jos bila rosie
-                    puneServo(1);
+                    josBila(true);      // am dat jos bila rosie
+                    servoBile.setPosition(1);
                     TimeUnit.MILLISECONDS.sleep(500);
-                    //rotire(0 ,treshHold, vitezaIntoarcere);       // ma pun pe 0 grade
-                    calibrareRampa(0,treshHold,vitezaIntoarcere);
 
                 }
 
 
             }
-            servoBile.setPosition(pozitieServoBileSus);
+
+            servoBile.setPosition(1);
+
             oprire();
+
             TimeUnit.MILLISECONDS.sleep(500);
             // formuleHolonom(navx_device.getYaw(),beta,vitezeHolonom);
 
             da_teJosDePeRampa(vitezaMiscare-0.015 , zeroRoll, altInitial);
-            rotire(90,treshHold,vitezaIntoarcere);
+
+
+            rotireTreptata(90,treshHold,vitezaIntoarcere);
+
+
+            //rotire(90,treshHold,vitezaIntoarcere); ATENTIE MARE AICI :)
+
+
+
+/* AICI INCEPE COMENTARIUL
+
+
             mergiFata(-vitezaMiscare,0);
-             TimeUnit.MILLISECONDS.sleep(300);
+
+            TimeUnit.MILLISECONDS.sleep(300);
             //  mergiDreapta(vitezaMiscare);
             // TimeUnit.MILLISECONDS.sleep(500);
             //du_teLaRaft2(raft,vitezaMiscare-0.01);
             du_teLaRaft(raft,vitezaMiscare -0.015);
-             mergiFata(vitezaMiscare,0);
+            mergiFata(vitezaMiscare,0);
             TimeUnit.MILLISECONDS.sleep(500);
             // mergiDreapta(vitezaMiscare);
             // TimeUnit.MILLISECONDS.sleep(500);
@@ -312,6 +302,9 @@ public class AutonomieAlbastru2 extends LinearOpMode {
             TimeUnit.MILLISECONDS.sleep(1000);
             mergiFata(-vitezaMiscare, 0);
             TimeUnit.MILLISECONDS.sleep(500);
+*/
+            //AICI SE TERMINA COMENTARIUL
+
             oprire();
 
             oprireTot();
@@ -321,85 +314,45 @@ public class AutonomieAlbastru2 extends LinearOpMode {
             //telemetry.addData("Red ", colorSensor.red());
             //telemetry.addLine();
             //telemetry.addLine(Double.toString(servo.getPosition()));
+
+
+
             terminat = true;
         }
         oprireTot();
     }
 
-    public void calibrareRampa(double tinta , double treshHold ,double viteza) {
 
 
-        double mergiStanga = viteza;
-        double mergiDreapta = -viteza;
-
-        while (navx_device.getYaw() >= tinta + treshHold && opModeIsActive()) {      // cat timp sunt in dreapta tintei vreau sa merg in stanga
-
-
-
-            telemetry.addData("Rotatie: ", navx_device.getYaw());
-            telemetry.addLine();
-            telemetry.addData("treshhold:", treshHold);
-            telemetry.addLine();
-            telemetry.addData("viteza:", viteza);
-            telemetry.update();
-
-
-
-            motorFrontLeft.setPower(mergiStanga);
-            motorFrontRight.setPower(mergiStanga);
-            motorBackRight.setPower(mergiStanga);
-            motorBackLeft.setPower(mergiStanga);
+    public double actualizeazaViteza(double tinta, double unghiActual,int incercari){
+        double diferenta = Math.abs(Math.abs(tinta) - Math.abs(unghiActual));
+        double scadere = 0;
+        if(incercari % 2 == 0) {
+            scadere = incercari / 2 * 0.01;
         }
-        oprire();
+        else
+            scadere = (incercari-1) / 2 * 0.01;
 
+        if(diferenta <= 30){
 
-        while(navx_device.getYaw() <= tinta - treshHold && opModeIsActive()) {    // cat timp sunt in partea stanga a tintei vreau sa merg in dreapta
-
-            telemetry.addData("Rotatie: ", navx_device.getYaw());
-            telemetry.addLine();
-            telemetry.addData("treshhold:", treshHold);
-            telemetry.addLine();
-            telemetry.addData("viteza:", viteza);
-            telemetry.update();
-
-            motorFrontLeft.setPower(mergiDreapta);
-            motorFrontRight.setPower(mergiDreapta);
-            motorBackRight.setPower(mergiDreapta);
-            motorBackLeft.setPower(mergiDreapta);
+            return vitezaIntoarcere - scadere;
         }
-        oprire();
-
+        else
+            return VitezaIntoarcereMare;
     }
 
 
-
-    public void formuleHolonom(double alpha, double beta, double[] vitezeHolonom) {
-
-        double xM, yM, scale=0.1;
-        xM = ( Math.cos(alpha) + 1 )/2;
-        yM = Math.sin(alpha)/2;
-        vitezeHolonom[0] = scale*(-xM-yM);
-        vitezeHolonom[1] = scale*(-xM+yM);
-        vitezeHolonom[2] = scale*(xM+yM);
-        vitezeHolonom[3] = scale*(+xM-yM);
-
-    }
-
-    public void urcaServo(Servo servo) {
-
-        servo.setPosition(1);
-
-    }
-
-
-    public void rotire(double tinta, double treshHold, double viteza) throws InterruptedException {
+    public void rotireTreptata(double tinta, double treshHold, double viteza) throws InterruptedException {
         int incercari = 0;
         boolean suntPeTinta = false;
-        while(!suntPeTinta && opModeIsActive()) {
-            double mergiStanga = viteza;
-            double mergiDreapta = -viteza;
+        while (!suntPeTinta && opModeIsActive()) {
+            double mergiStanga;
+            double mergiDreapta;
 
-            while(navx_device.getYaw() >= tinta + treshHold && opModeIsActive()){      // cat timp sunt in dreapta tintei vreau sa merg in stanga
+            while (navx_device.getYaw() >= tinta + treshHold && opModeIsActive()) {// cat timp sunt in dreapta tintei vreau sa merg in stanga
+                viteza = actualizeazaViteza(tinta,navx_device.getYaw(),incercari);
+                mergiStanga = viteza;
+                mergiDreapta = -viteza;
                 telemetry.addData("Rotatie: ", navx_device.getYaw());
                 telemetry.addLine();
                 telemetry.addData("incercari:", incercari);
@@ -417,12 +370,14 @@ public class AutonomieAlbastru2 extends LinearOpMode {
             TimeUnit.MILLISECONDS.sleep(500);
 
 
-            if( navx_device.getYaw() >= tinta - treshHold && navx_device.getYaw() <= tinta + treshHold)     // daca sunt pe o parte sau o alta a tintei si in limitele tresholdului ma opresc
+            if (navx_device.getYaw() >= tinta - treshHold && navx_device.getYaw() <= tinta + treshHold)     // daca sunt pe o parte sau o alta a tintei si in limitele tresholdului ma opresc
                 suntPeTinta = true;
 
-            if(!suntPeTinta){     // daca nu m-am pozitionat bine, incerc sa merg in dreapta. Robotul nu se poate opri decat in limitele treshHoldului sau in partea stanga
-                while(navx_device.getYaw() <= tinta - treshHold && opModeIsActive()) {    // cat timp sunt in partea stanga a tintei vreau sa merg in dreapta
-
+            if (!suntPeTinta) {     // daca nu m-am pozitionat bine, incerc sa merg in dreapta. Robotul nu se poate opri decat in limitele treshHoldului sau in partea stanga
+                while (navx_device.getYaw() <= tinta - treshHold && opModeIsActive()) {    // cat timp sunt in partea stanga a tintei vreau sa merg in dreapta
+                    viteza = actualizeazaViteza(tinta,navx_device.getYaw(),incercari);
+                    mergiStanga = viteza;
+                    mergiDreapta = -viteza;
                     telemetry.addData("Rotatie: ", navx_device.getYaw());
                     telemetry.addLine();
                     telemetry.addData("incercari:", incercari);
@@ -441,24 +396,25 @@ public class AutonomieAlbastru2 extends LinearOpMode {
                 TimeUnit.MILLISECONDS.sleep(500);
             }
 
-            if( navx_device.getYaw() >= tinta - treshHold && navx_device.getYaw() <= tinta + treshHold)   // daca sunt pe o parte sau o alta a tintei si in limitele tresholdului ma opresc
+            if (navx_device.getYaw() >= tinta - treshHold && navx_device.getYaw() <= tinta + treshHold)   // daca sunt pe o parte sau o alta a tintei si in limitele tresholdului ma opresc
                 suntPeTinta = true;
 
 
             incercari++;
-            if(incercari % 2 == 0 && incercari != 0){   // daca dupa doua incercari nu a reusit, il ajut putin . O incercare inseamna o rotire spre stanga si o rotire spre dreapta sau viceversa
+            /*if (incercari % 2 == 0 && incercari != 0) {   // daca dupa doua incercari nu a reusit, il ajut putin . O incercare inseamna o rotire spre stanga si o rotire spre dreapta sau viceversa
                 // treshHold += 0.5;
                 viteza -= 0.01;
             }
+            */
 
-            if(suntPeTinta)
+            if (suntPeTinta)
                 oprire();
 
         }
 
 
-
     }
+
 
 
     public void mergiFata(double viteza, double plus){
@@ -517,8 +473,14 @@ public class AutonomieAlbastru2 extends LinearOpMode {
 
     }
 
-   /* public void prindeCub(double stanga, double dreapta) throws InterruptedException {
+    public void prindeCub(double stanga, double dreapta) throws InterruptedException {
 
+        CubSJ.setPosition(0.4614);
+        CubDJ.setPosition(0.4785);
+        TimeUnit.MILLISECONDS.sleep(300);
+        mRid.setPower(-1);
+        TimeUnit.MILLISECONDS.sleep(300);
+        mRid.setPower(0);
         CubSJ.setPosition(stanga);
         CubDJ.setPosition(dreapta);
         TimeUnit.MILLISECONDS.sleep(500);
@@ -527,57 +489,53 @@ public class AutonomieAlbastru2 extends LinearOpMode {
         mRid.setPower(0);
 
     }
-*/
-   public void prindeCub(double stanga, double dreapta) throws InterruptedException {
-
-       CubSJ.setPosition(0.4614);
-       CubDJ.setPosition(0.4785);
-       TimeUnit.MILLISECONDS.sleep(300);
-       mRid.setPower(-1);
-       TimeUnit.MILLISECONDS.sleep(300);
-       mRid.setPower(0);
-       CubSJ.setPosition(stanga);
-       CubDJ.setPosition(dreapta);
-       TimeUnit.MILLISECONDS.sleep(500);
-       mRid.setPower(1);
-       TimeUnit.MILLISECONDS.sleep(500);
-       mRid.setPower(0);
-
-   }
     public void lasaCub(double stanga, double dreapta) throws InterruptedException {
         CubSJ.setPosition(stanga);
         CubDJ.setPosition(dreapta);
     }
 
-    public void puneServo(double poz){
-        servoBile.setPosition(poz);
-    }
 
 
 
+     ////////----------------------------------------------------------------------------------------------------------
     public void da_teJosDePeRampa(double viteza, double rollInitial, double altInitial){
 
         mergiFata(viteza, 0);
 
         double treshHold = .2;
-        while (Math.abs(navx_device.getPitch()) <= 10 && opModeIsActive()) {idle();}
-        while(Math.abs(navx_device.getPitch()) >= 4 && opModeIsActive()) {
+        while (Math.abs(navx_device.getPitch()) <= 6 && opModeIsActive()) {
+            idle();
+        }
+        while (Math.abs(navx_device.getPitch()) >=3 && opModeIsActive()) {
             telemetry.addData("Roll: ", Math.abs(navx_device.getPitch()));
             telemetry.update();
         }
         oprire();
     }
 
-    public void puneServoTreptat(Servo servo , double tinta, double pozInitial){
 
-        while(servo.getPosition() > tinta) {
-            servo.setPosition(pozInitial);
-            pozInitial -= 0.005;
+    public void josBila(boolean stanga) throws InterruptedException {
+
+        if (stanga) {
+
+            servoBileSD.setPosition(1);
+
+        }
+        else {
+
+            servoBileSD.setPosition(0);
+
         }
 
+        TimeUnit.MILLISECONDS.sleep(500);
+        servoBileSD.setPosition(0.5);
+
     }
+
     public void du_teLaRaft2(int raft, double viteza){
+
         double tinta;
+
         switch(raft) {
 
             case 1:
@@ -590,11 +548,12 @@ public class AutonomieAlbastru2 extends LinearOpMode {
                 tinta=distRaft3;
                 break;
             default:
-                tinta=distRaft1;
+                tinta=distRaft2;
 
-          }
+        }
 
         double distantaCurenta = rangeSensor.getDistance(DistanceUnit.CM);
+
         while(distantaCurenta < tinta)
         {
             distantaCurenta = rangeSensor.getDistance(DistanceUnit.CM);

@@ -286,8 +286,8 @@ public class xeo_teleopp extends OpMode {
         /* ---------------------------- </profiluri> ----------------------------  */
         /** ----------------------------- <prindere> ----------------------------- */
         if (profil==1) {
-            servoRidD_0.setPosition(servoPozD);
-            servoRidS_0.setPosition(servoPozS);
+            servoRidD_0.setPosition(servoPozD + 0.03);
+            servoRidS_0.setPosition(servoPozS - 0.03);
             servoRidD_1.setPosition(servoPozD);
             servoRidS_1.setPosition(servoPozS);
             relicPrindere.setPosition(0);
