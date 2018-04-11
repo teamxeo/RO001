@@ -272,7 +272,10 @@ public class AutonomieRosu2Test extends LinearOpMode {
             rotireSpeciala(-180,treshHold,vitezaIntoarcere);
             oprire();
             //if(raft == 3) {
-            //    mergiDreapta(vitezaMiscare);
+            //    mergiDreapta(vitezaMis
+            car
+
+            e);
             //    TimeUnit.MILLISECONDS.sleep(550);
             // }*/
             mergiFata(-0.1, 0);
